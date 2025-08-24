@@ -3,75 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RCS Emulator SaaS - Login</title>
-    <link rel="stylesheet" href="auth.css">
+    <title>Sign In - RCS Emulator SaaS</title>
+    <link rel="stylesheet" href="login.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="auth-container">
-        <div class="auth-card">
-            <div class="auth-header">
-                <div class="logo">
-                    <div class="logo-icon">📱</div>
-                    <h1>RCS Emulator</h1>
+    <!-- Header -->
+    <header class="login-header">
+        <div class="header-container">
+            <div class="header-logo">
+                <div class="logo-icon">📱</div>
+                <span class="logo-text">RCS Emulator</span>
+            </div>
+            <div class="header-nav">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#api" class="nav-link">API</a>
+                <a href="#docs" class="nav-link">Documentation</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="login-main">
+        <div class="login-container">
+            <!-- Left Side - Hero Content -->
+            <div class="hero-section">
+                <div class="hero-content">
+                    <h1>Professional RCS Business Messaging</h1>
+                    <p class="hero-subtitle">Develop and test Rich Communication Services with our iPhone 16 Pro Max emulator and comprehensive API platform.</p>
+                    
+                    <div class="features-grid">
+                        <div class="feature-item">
+                            <div class="feature-icon">📱</div>
+                            <div class="feature-text">
+                                <h3>iPhone 16 Pro Max Emulation</h3>
+                                <p>Pixel-perfect iOS messaging interface</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🚀</div>
+                            <div class="feature-text">
+                                <h3>Complete API Platform</h3>
+                                <p>RESTful API with cURL generation</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">💎</div>
+                            <div class="feature-text">
+                                <h3>Rich Message Types</h3>
+                                <p>Cards, media, actions, and more</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">⚡</div>
+                            <div class="feature-text">
+                                <h3>Instant Testing</h3>
+                                <p>Real-time message preview</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-section">
+                        <div class="stat-item">
+                            <div class="stat-number">80%+</div>
+                            <div class="stat-label">RCS Coverage</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">100%</div>
+                            <div class="stat-label">API Compatible</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">0ms</div>
+                            <div class="stat-label">Setup Time</div>
+                        </div>
+                    </div>
                 </div>
-                <p class="tagline">Professional RCS Business Messaging Development Platform</p>
             </div>
 
-            <form class="auth-form" id="loginForm">
-                <h2>Sign In to Your Account</h2>
-                
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" required placeholder="Enter your username">
-                </div>
-
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required placeholder="Enter your password">
-                </div>
-
-                <button type="submit" class="auth-btn">Sign In</button>
-
-                <div class="demo-credentials">
-                    <p><strong>Demo Credentials:</strong></p>
-                    <p>Username: <code>user</code></p>
-                    <p>Password: <code>user</code></p>
-                </div>
-
-                <div class="auth-error" id="authError" style="display: none;"></div>
-            </form>
-
-            <div class="auth-features">
-                <h3>Platform Features</h3>
-                <div class="features-grid">
-                    <div class="feature">
-                        <div class="feature-icon">🎯</div>
-                        <h4>iPhone 16 Pro Max Emulation</h4>
-                        <p>Pixel-perfect RCS message testing</p>
+            <!-- Right Side - Login Form -->
+            <div class="login-section">
+                <div class="login-card">
+                    <div class="login-header-text">
+                        <h2>Welcome back</h2>
+                        <p>Sign in to your RCS Emulator account</p>
                     </div>
-                    <div class="feature">
-                        <div class="feature-icon">🔧</div>
-                        <h4>Developer Tools</h4>
-                        <p>JSON validation and message templates</p>
-                    </div>
-                    <div class="feature">
-                        <div class="feature-icon">🚀</div>
-                        <h4>API Integration</h4>
-                        <p>Send RCS messages via REST API</p>
-                    </div>
-                    <div class="feature">
-                        <div class="feature-icon">⚡</div>
-                        <h4>Real-time Testing</h4>
-                        <p>Instant message rendering and feedback</p>
+
+                    <form class="login-form" id="loginForm">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" id="username" name="username" required placeholder="Enter your username" autocomplete="username">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input type="password" id="password" name="password" required placeholder="Enter your password" autocomplete="current-password">
+                        </div>
+
+                        <button type="submit" class="login-btn">
+                            <span class="btn-text">Sign In</span>
+                            <div class="btn-loader" style="display: none;">
+                                <div class="spinner"></div>
+                            </div>
+                        </button>
+
+                        <div id="authError" class="auth-error" style="display: none;"></div>
+                    </form>
+
+                    <div class="demo-section">
+                        <div class="demo-header">
+                            <div class="demo-icon">🎯</div>
+                            <h3>Demo Access</h3>
+                        </div>
+                        <p>Try the platform with demo credentials:</p>
+                        <div class="demo-credentials">
+                            <div class="credential-item">
+                                <span class="credential-label">Username:</span>
+                                <code class="credential-value">user</code>
+                            </div>
+                            <div class="credential-item">
+                                <span class="credential-label">Password:</span>
+                                <code class="credential-value">user</code>
+                            </div>
+                        </div>
+                        <button type="button" class="demo-btn" id="demoLoginBtn">
+                            Use Demo Credentials
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="login-footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <p>&copy; 2024 RCS Emulator SaaS. Professional business messaging development platform.</p>
+                <div class="footer-links">
+                    <a href="#privacy">Privacy</a>
+                    <a href="#terms">Terms</a>
+                    <a href="#support">Support</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 
     <script src="auth.js"></script>
+    <script>
+        // Demo login functionality
+        document.getElementById('demoLoginBtn').addEventListener('click', () => {
+            document.getElementById('username').value = 'user';
+            document.getElementById('password').value = 'user';
+            document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+        });
+    </script>
 </body>
 </html>

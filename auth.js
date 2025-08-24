@@ -49,10 +49,25 @@ class AuthSystem {
         
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
+        const loginBtn = document.querySelector('.login-btn');
+        const btnText = document.querySelector('.btn-text');
+        const btnLoader = document.querySelector('.btn-loader');
         const errorDiv = document.getElementById('authError');
         
+        // Show loading state
+        if (loginBtn && btnText && btnLoader) {
+            loginBtn.disabled = true;
+            btnText.style.opacity = '0';
+            btnLoader.style.display = 'block';
+        }
+        
         // Clear previous errors
-        errorDiv.style.display = 'none';
+        if (errorDiv) {
+            errorDiv.style.display = 'none';
+        }
+        
+        // Simulate network delay for better UX
+        await new Promise(resolve => setTimeout(resolve, 800));
         
         // Simple authentication (in production, this would be a secure API call)
         if (username === 'user' && password === 'user') {
@@ -62,25 +77,43 @@ class AuthSystem {
             // Store user data
             const userData = {
                 username: username,
+                email: `${username}@rcsemulator.com`,
+                name: username.charAt(0).toUpperCase() + username.slice(1),
                 loginTime: new Date().toISOString(),
-                id: 'user_001'
+                id: 'user_001',
+                role: 'developer'
             };
             
             localStorage.setItem('rcs_user', JSON.stringify(userData));
             localStorage.setItem('rcs_api_key', apiKey);
+            localStorage.setItem('rcs_login_time', userData.loginTime);
             
             this.currentUser = userData;
             this.apiKey = apiKey;
             
-            // Show success message briefly
-            this.showSuccess('Login successful! Redirecting...');
+            // Show success state briefly
+            if (loginBtn && btnText && btnLoader) {
+                btnLoader.style.display = 'none';
+                btnText.textContent = 'Success!';
+                btnText.style.opacity = '1';
+                loginBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+            }
             
-            // Redirect to dashboard
+            // Redirect after brief success display
             setTimeout(() => {
                 window.location.href = 'dashboard.html';
-            }, 1000);
+            }, 500);
             
         } else {
+            // Reset button state
+            if (loginBtn && btnText && btnLoader) {
+                loginBtn.disabled = false;
+                btnText.style.opacity = '1';
+                btnText.textContent = 'Sign In';
+                btnLoader.style.display = 'none';
+                loginBtn.style.background = 'linear-gradient(135deg, #007AFF, #5856D6)';
+            }
+            
             this.showError('Invalid username or password. Please use: user/user');
         }
     }
