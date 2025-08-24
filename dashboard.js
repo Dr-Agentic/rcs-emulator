@@ -107,16 +107,34 @@ class Dashboard {
                 });
             }
             
-            // Handle refresh button for debugging
+            // Handle refresh button with event delegation for better reliability
+            document.addEventListener('click', (e) => {
+                if (e.target && e.target.id === 'refreshCurlBtn') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Manual refresh triggered via delegation');
+                    const jsonContent = jsonInput.value.trim();
+                    console.log('JSON content for refresh:', jsonContent);
+                    this.updateCurlCommand(jsonContent);
+                    this.showToast('cURL command refreshed!', 'success');
+                }
+            });
+            
+            // Also try direct binding as backup
             const refreshCurlBtn = document.getElementById('refreshCurlBtn');
+            console.log('Looking for refreshCurlBtn:', refreshCurlBtn);
             if (refreshCurlBtn) {
+                console.log('Setting up refresh button listener');
                 refreshCurlBtn.addEventListener('click', (e) => {
                     e.preventDefault();
-                    console.log('Manual refresh triggered');
+                    console.log('Manual refresh triggered via direct binding');
                     const jsonContent = jsonInput.value.trim();
+                    console.log('JSON content for refresh:', jsonContent);
                     this.updateCurlCommand(jsonContent);
                     this.showToast('cURL command refreshed!', 'success');
                 });
+            } else {
+                console.error('refreshCurlBtn not found!');
             }
             
             console.log('Curl command setup complete');
