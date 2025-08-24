@@ -125,6 +125,80 @@
                         <p class="api-key-note">Use this API key to send messages programmatically</p>
                     </div>
                     
+                    <!-- RCS Server Configuration -->
+                    <div class="server-config-section">
+                        <h3>RCS Server Configuration</h3>
+                        <p class="section-description">Configure your server endpoint to receive user interactions (messages, button clicks, etc.)</p>
+                        
+                        <div class="form-group">
+                            <label for="rcsServerUrl">RCS Server Endpoint URL</label>
+                            <input 
+                                type="url" 
+                                id="rcsServerUrl" 
+                                placeholder="https://your-server.com/rcs/webhook" 
+                                class="server-input"
+                            >
+                            <div class="input-help">
+                                <span class="help-icon">💡</span>
+                                <span class="help-text">Your server will receive POST requests with user interaction data</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="authToken">Authentication Token (Optional)</label>
+                            <input 
+                                type="password" 
+                                id="authToken" 
+                                placeholder="Bearer token or API key" 
+                                class="server-input"
+                            >
+                            <div class="input-help">
+                                <span class="help-icon">🔒</span>
+                                <span class="help-text">Will be sent as Authorization header</span>
+                            </div>
+                        </div>
+
+                        <div class="server-controls">
+                            <button id="testServerBtn" class="test-btn">Test Connection</button>
+                            <button id="saveServerBtn" class="save-btn">Save Configuration</button>
+                        </div>
+
+                        <div id="serverStatus" class="server-status" style="display: none;"></div>
+
+                        <div class="webhook-info">
+                            <h4>Webhook Payload Examples</h4>
+                            <div class="payload-examples">
+                                <div class="payload-example">
+                                    <h5>Text Message</h5>
+                                    <pre class="payload-code">{
+  "type": "message",
+  "messageType": "text",
+  "text": "Hello from user",
+  "userId": "user_12345",
+  "timestamp": "2024-08-24T03:30:00Z",
+  "sessionId": "session_abc123"
+}</pre>
+                                </div>
+                                <div class="payload-example">
+                                    <h5>Button Click</h5>
+                                    <pre class="payload-code">{
+  "type": "action",
+  "actionType": "button_click",
+  "action": "buy_now",
+  "label": "Buy Now",
+  "userId": "user_12345",
+  "timestamp": "2024-08-24T03:30:00Z",
+  "sessionId": "session_abc123",
+  "context": {
+    "messageId": "msg_789",
+    "cardTitle": "iPhone 15 Pro"
+  }
+}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="json-input-section">
                         <label for="jsonInput">RCS Message JSON:</label>
                         <textarea 

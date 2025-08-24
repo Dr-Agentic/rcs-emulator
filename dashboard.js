@@ -50,6 +50,9 @@ class Dashboard {
         // Setup example buttons
         this.setupExampleButtons();
         
+        // Setup server configuration
+        this.setupServerConfig();
+        
         // Show default section
         this.showSection('emulator');
     }
@@ -249,6 +252,211 @@ class Dashboard {
             });
         });
     }
+
+    setupServerConfig() {
+        const serverUrlInput = document.getElementById('rcsServerUrl');
+        const authTokenInput = document.getElementById('authToken');
+        const testServerBtn = document.getElementById('testServerBtn');
+        const saveServerBtn = document.getElementById('saveServerBtn');
+        const serverStatus = document.getElementById('serverStatus');
+        
+        if (!serverUrlInput || !testServerBtn || !saveServerBtn) return;
+        
+        // Load saved configuration
+        this.loadServerConfig();
+        
+        // Test server connection
+        testServerBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await this.testServerConnection();
+        });
+        
+        // Save server configuration
+        saveServerBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.saveServerConfig();
+        });
+        
+        // Auto-save on input change (debounced)
+        let saveTimeout;
+        [serverUrlInput, authTokenInput].forEach(input => {
+            input.addEventListener('input', () => {
+                clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(() => {
+                    this.saveServerConfig(false); // Silent save
+                }, 1000);
+            });
+        });
+    }
+    
+    loadServerConfig() {
+        const config = this.getServerConfig();
+        const serverUrlInput = document.getElementById('rcsServerUrl');
+        const authTokenInput = document.getElementById('authToken');
+        
+        if (serverUrlInput && config.serverUrl) {
+            serverUrlInput.value = config.serverUrl;
+        }
+        if (authTokenInput && config.authToken) {
+            authTokenInput.value = config.authToken;
+        }
+    }
+    
+    getServerConfig() {
+        try {
+            const config = localStorage.getItem('rcs_server_config');
+            return config ? JSON.parse(config) : {};
+        } catch (error) {
+            console.error('Error loading server config:', error);
+            return {};
+        }
+    }
+    
+    saveServerConfig(showToast = true) {
+        const serverUrlInput = document.getElementById('rcsServerUrl');
+        const authTokenInput = document.getElementById('authToken');
+        
+        const config = {
+            serverUrl: serverUrlInput?.value?.trim() || '',
+            authToken: authTokenInput?.value?.trim() || '',
+            lastUpdated: new Date().toISOString()
+        };
+        
+        try {
+            localStorage.setItem('rcs_server_config', JSON.stringify(config));
+            if (showToast) {
+                this.showToast('Server configuration saved!', 'success');
+            }
+        } catch (error) {
+            console.error('Error saving server config:', error);
+            if (showToast) {
+                this.showToast('Error saving configuration', 'error');
+            }
+        }
+    }
+    
+    async testServerConnection() {
+        const config = this.getServerConfig();
+        const serverStatus = document.getElementById('serverStatus');
+        const testBtn = document.getElementById('testServerBtn');
+        
+        if (!config.serverUrl) {
+            this.showServerStatus('Please enter a server URL first', 'error');
+            return;
+        }
+        
+        // Show loading state
+        if (testBtn) {
+            testBtn.disabled = true;
+            testBtn.textContent = 'Testing...';
+        }
+        
+        try {
+            // Test with a simple ping payload
+            const testPayload = {
+                type: 'ping',
+                timestamp: new Date().toISOString(),
+                source: 'rcs_emulator_test'
+            };
+            
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            if (config.authToken) {
+                headers['Authorization'] = config.authToken.startsWith('Bearer ') 
+                    ? config.authToken 
+                    : `Bearer ${config.authToken}`;
+            }
+            
+            const response = await fetch(config.serverUrl, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(testPayload)
+            });
+            
+            if (response.ok) {
+                this.showServerStatus(`✅ Connection successful (${response.status})`, 'success');
+            } else {
+                this.showServerStatus(`❌ Server responded with ${response.status}: ${response.statusText}`, 'error');
+            }
+            
+        } catch (error) {
+            console.error('Server test error:', error);
+            this.showServerStatus(`❌ Connection failed: ${error.message}`, 'error');
+        } finally {
+            // Reset button state
+            if (testBtn) {
+                testBtn.disabled = false;
+                testBtn.textContent = 'Test Connection';
+            }
+        }
+    }
+    
+    showServerStatus(message, type) {
+        const serverStatus = document.getElementById('serverStatus');
+        if (!serverStatus) return;
+        
+        serverStatus.textContent = message;
+        serverStatus.className = `server-status ${type}`;
+        serverStatus.style.display = 'block';
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            serverStatus.style.display = 'none';
+        }, 5000);
+    }
+    
+    // Method to send user interactions to configured server
+    async sendUserInteraction(interactionData) {
+        const config = this.getServerConfig();
+        
+        if (!config.serverUrl) {
+            console.log('No server configured, interaction not sent:', interactionData);
+            return;
+        }
+        
+        try {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            if (config.authToken) {
+                headers['Authorization'] = config.authToken.startsWith('Bearer ') 
+                    ? config.authToken 
+                    : `Bearer ${config.authToken}`;
+            }
+            
+            const response = await fetch(config.serverUrl, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({
+                    ...interactionData,
+                    timestamp: new Date().toISOString(),
+                    sessionId: this.getSessionId()
+                })
+            });
+            
+            if (!response.ok) {
+                console.error('Failed to send interaction:', response.status, response.statusText);
+            } else {
+                console.log('User interaction sent successfully:', interactionData);
+            }
+            
+        } catch (error) {
+            console.error('Error sending user interaction:', error);
+        }
+    }
+    
+    getSessionId() {
+        let sessionId = localStorage.getItem('rcs_session_id');
+        if (!sessionId) {
+            sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('rcs_session_id', sessionId);
+        }
+        return sessionId;
+    }
+
         // Handle API key copy buttons
         const copyButtons = document.querySelectorAll('#copyApiKey, #copySettingsApiKey');
         copyButtons.forEach(btn => {

@@ -110,6 +110,15 @@ class RCSEmulator {
         this.handleInputChange();
         this.hideAttachmentOptions();
 
+        // Send user interaction to configured server
+        this.sendUserInteraction({
+            type: 'message',
+            messageType: 'text',
+            text: text,
+            userId: this.getUserId(),
+            messageId: message.id
+        });
+
         // Simulate message status updates
         setTimeout(() => this.updateMessageStatus(message.id, 'sent'), 500);
         setTimeout(() => this.updateMessageStatus(message.id, 'delivered'), 1000);
@@ -238,6 +247,24 @@ class RCSEmulator {
             case 'read': return '✓✓';
             default: return '○';
         }
+    }
+
+    async sendUserInteraction(interactionData) {
+        // Use dashboard's sendUserInteraction method if available
+        if (window.dashboard && typeof window.dashboard.sendUserInteraction === 'function') {
+            await window.dashboard.sendUserInteraction(interactionData);
+        } else {
+            console.log('Dashboard not available, interaction logged:', interactionData);
+        }
+    }
+
+    getUserId() {
+        let userId = localStorage.getItem('rcs_user_id');
+        if (!userId) {
+            userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('rcs_user_id', userId);
+        }
+        return userId;
     }
 
     updateMessageStatus(messageId, status) {
@@ -625,26 +652,64 @@ class RCSEmulator {
 }
 
 // Global functions for rich card actions
-window.handleRichCardAction = function(action) {
+window.handleRichCardAction = function(action, context = {}) {
     console.log('Rich card action:', action);
+    
+    // Send interaction to configured server
+    if (window.rcsEmulator) {
+        window.rcsEmulator.sendUserInteraction({
+            type: 'action',
+            actionType: 'button_click',
+            action: action,
+            userId: window.rcsEmulator.getUserId(),
+            context: {
+                ...context,
+                timestamp: new Date().toISOString()
+            }
+        });
+    }
+    
     // Handle rich card actions here
     switch (action) {
+        case 'buy_now':
+        case 'buy_iphone':
+            alert('🛒 Redirecting to purchase page...');
+            break;
+        case 'learn_more':
+            alert('📖 Opening product details...');
+            break;
+        case 'order_coffee':
+            alert('☕ Adding to cart...');
+            break;
+        case 'view_menu':
+            alert('📋 Opening menu...');
+            break;
         case 'open_maps':
-            alert('Opening in Maps app...');
+            alert('🗺️ Opening in Maps app...');
             break;
         case 'add_contact':
-            alert('Adding contact to address book...');
+            alert('📞 Adding contact to address book...');
             break;
         case 'call_contact':
-            alert('Initiating call...');
+            alert('📱 Initiating call...');
             break;
         default:
             console.log('Unknown action:', action);
+            alert(`Action: ${action}`);
     }
 };
 
 window.sendSuggestedAction = function(text) {
     if (window.rcsEmulator) {
+        // Send interaction to configured server
+        window.rcsEmulator.sendUserInteraction({
+            type: 'action',
+            actionType: 'suggested_action',
+            text: text,
+            userId: window.rcsEmulator.getUserId()
+        });
+        
+        // Send the message
         window.rcsEmulator.messageInput.value = text;
         window.rcsEmulator.sendMessage();
     }
