@@ -529,14 +529,54 @@ body {
 }
 
 .examples-section {
-    margin-bottom: 24px;
+    margin-bottom: 32px;
 }
 
 .examples-section h3 {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: 600;
     color: #1d1d1f;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
+}
+
+.example-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-top: 20px;
+}
+
+.example-category {
+    background: #f8f9fa;
+    border: 1px solid #e5e5e7;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.example-category h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1d1d1f;
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.example-category .example-btn {
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+.example-category .example-btn:last-child {
+    margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+    .example-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
 }
 
 .example-buttons {
