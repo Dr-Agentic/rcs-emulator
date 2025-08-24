@@ -15,11 +15,8 @@ class Dashboard {
         this.setupNavigation();
         this.loadUserData();
         this.setupSSE();
-        
-        // Setup curl command after a short delay to ensure DOM is ready
-        setTimeout(() => {
-            this.setupCurlCommand();
-        }, 1000);
+        this.setupCurlCommand();
+        this.setupServerConfig();
         
         console.log('Dashboard initialization complete');
     }
@@ -50,41 +47,25 @@ class Dashboard {
         // Setup example buttons
         this.setupExampleButtons();
         
-        // Setup server configuration
-        this.setupServerConfig();
-        
         // Show default section
         this.showSection('emulator');
     }
 
     setupCurlCommand() {
-        console.log('Setting up curl command...');
-        
         const jsonInput = document.getElementById('jsonInput');
         const curlCommand = document.getElementById('curlCommand');
         const copyCurlBtn = document.getElementById('copyCurlBtn');
         
-        console.log('Elements found:', {
-            jsonInput: !!jsonInput,
-            curlCommand: !!curlCommand,
-            copyCurlBtn: !!copyCurlBtn
-        });
-        
         if (jsonInput && curlCommand) {
-            console.log('Setting up curl command listeners...');
-            
             // Update curl command when JSON changes
             const updateCurlCommand = () => {
-                console.log('Updating curl command...');
                 const jsonContent = jsonInput.value.trim();
-                console.log('JSON content:', jsonContent.substring(0, 50) + '...');
                 this.updateCurlCommand(jsonContent);
             };
             
             // Update on input change with debouncing
             let timeout;
             jsonInput.addEventListener('input', () => {
-                console.log('JSON input changed');
                 clearTimeout(timeout);
                 timeout = setTimeout(updateCurlCommand, 300);
             });
@@ -107,39 +88,16 @@ class Dashboard {
                 });
             }
             
-            // Handle refresh button with event delegation for better reliability
-            document.addEventListener('click', (e) => {
-                if (e.target && e.target.id === 'refreshCurlBtn') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Manual refresh triggered via delegation');
-                    const jsonContent = jsonInput.value.trim();
-                    console.log('JSON content for refresh:', jsonContent);
-                    this.updateCurlCommand(jsonContent);
-                    this.showToast('cURL command refreshed!', 'success');
-                }
-            });
-            
-            // Also try direct binding as backup
+            // Handle refresh button
             const refreshCurlBtn = document.getElementById('refreshCurlBtn');
-            console.log('Looking for refreshCurlBtn:', refreshCurlBtn);
             if (refreshCurlBtn) {
-                console.log('Setting up refresh button listener');
                 refreshCurlBtn.addEventListener('click', (e) => {
                     e.preventDefault();
-                    console.log('Manual refresh triggered via direct binding');
                     const jsonContent = jsonInput.value.trim();
-                    console.log('JSON content for refresh:', jsonContent);
                     this.updateCurlCommand(jsonContent);
                     this.showToast('cURL command refreshed!', 'success');
                 });
-            } else {
-                console.error('refreshCurlBtn not found!');
             }
-            
-            console.log('Curl command setup complete');
-        } else {
-            console.error('Required elements not found for curl setup');
         }
     }
 
@@ -323,27 +281,21 @@ class Dashboard {
         const content = document.getElementById('serverConfigContent');
         
         if (!serverUrlInput || !testServerBtn || !saveServerBtn) {
-            console.warn('Server config elements not found');
             return;
         }
         
         // Setup collapsible functionality
         if (toggleHeader && content) {
-            console.log('Setting up collapsible functionality');
             toggleHeader.addEventListener('click', (e) => {
                 e.preventDefault();
-                console.log('Toggle clicked');
                 const isExpanded = content.style.display === 'block';
-                console.log('Current state - isExpanded:', isExpanded);
                 
                 if (isExpanded) {
                     // Collapse
-                    console.log('Collapsing');
                     toggleHeader.classList.remove('expanded');
                     content.style.display = 'none';
                 } else {
                     // Expand
-                    console.log('Expanding');
                     toggleHeader.classList.add('expanded');
                     content.style.display = 'block';
                 }
@@ -352,9 +304,6 @@ class Dashboard {
             // Initialize as collapsed
             toggleHeader.classList.remove('expanded');
             content.style.display = 'none';
-            console.log('Initialized as collapsed');
-        } else {
-            console.warn('Collapsible elements not found:', { toggleHeader, content });
         }
         
         // Load saved configuration
@@ -552,6 +501,7 @@ class Dashboard {
         return sessionId;
     }
 
+    setupCopyButtons() {
         // Handle API key copy buttons
         const copyButtons = document.querySelectorAll('#copyApiKey, #copySettingsApiKey');
         copyButtons.forEach(btn => {
@@ -702,34 +652,23 @@ class Dashboard {
     }
 
     loadUserData() {
-        console.log('Loading user data...');
-        
         // Try to get data from AuthSystem first
         let userData = null;
         let apiKey = null;
         
-        console.log('Checking AuthSystem:', !!window.AuthSystem);
         if (window.AuthSystem) {
             userData = window.AuthSystem.getCurrentUser();
             apiKey = window.AuthSystem.getApiKey();
-            console.log('AuthSystem provided:', { userData: !!userData, apiKey: !!apiKey });
         }
         
         // Fallback to localStorage if AuthSystem not available
         if (!userData || !apiKey) {
-            console.log('Checking localStorage...');
             const storedUserData = localStorage.getItem('rcs_user');
             const storedApiKey = localStorage.getItem('rcs_api_key');
-            
-            console.log('LocalStorage has:', { 
-                userData: !!storedUserData, 
-                apiKey: !!storedApiKey 
-            });
             
             if (storedUserData) {
                 try {
                     userData = JSON.parse(storedUserData);
-                    console.log('Parsed user data:', userData);
                 } catch (e) {
                     console.error('Error parsing stored user data:', e);
                 }
@@ -737,17 +676,13 @@ class Dashboard {
             
             if (storedApiKey) {
                 apiKey = storedApiKey;
-                console.log('Found stored API key:', apiKey.substring(0, 8) + '...');
             }
         }
         
         // Generate API key if none found
         if (!apiKey) {
-            console.log('No API key found, generating demo key...');
             apiKey = 'rcs_demo_key_12345';
-            // Store it for future use
             localStorage.setItem('rcs_api_key', apiKey);
-            console.log('Generated and stored demo API key');
         }
         
         // Set user data in UI
@@ -781,33 +716,23 @@ class Dashboard {
             });
         }
 
-        // Set API key - this should always work now
-        console.log('Setting API key in UI elements...');
+        // Set API key
         const apiKeyElements = document.querySelectorAll('#apiKeyDisplay, #settingsApiKey');
-        console.log('Found API key elements:', apiKeyElements.length);
-        
-        apiKeyElements.forEach((el, index) => {
+        apiKeyElements.forEach(el => {
             if (el) {
                 el.textContent = apiKey;
-                console.log(`Updated API key element ${index} (${el.id}):`, apiKey.substring(0, 8) + '...');
-            } else {
-                console.warn(`API key element ${index} is null`);
             }
         });
         
-        if (apiKeyElements.length === 0) {
-            console.error('No API key elements found in DOM!');
-            // Try to find them with a delay
-            setTimeout(() => {
-                const delayedElements = document.querySelectorAll('#apiKeyDisplay, #settingsApiKey');
-                console.log('Delayed search found:', delayedElements.length, 'API key elements');
-                delayedElements.forEach(el => {
-                    if (el) el.textContent = apiKey;
-                });
-            }, 1000);
-        }
-        
-        console.log('API key loading complete:', apiKey.substring(0, 8) + '...');
+        // Delayed update as backup
+        setTimeout(() => {
+            const delayedElements = document.querySelectorAll('#apiKeyDisplay, #settingsApiKey');
+            delayedElements.forEach(el => {
+                if (el && el.textContent === 'Loading...') {
+                    el.textContent = apiKey;
+                }
+            });
+        }, 1000);
 
         // Set message count
         const messagesCount = document.getElementById('messagesCount');
@@ -936,16 +861,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Also initialize if DOM is already loaded
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log('DOM loaded (deferred), initializing dashboard');
-        try {
-            window.dashboard = new Dashboard();
-        } catch (error) {
-            console.error('Error initializing dashboard (deferred):', error);
-        }
-    });
-} else {
+if (document.readyState !== 'loading') {
     console.log('DOM already loaded, initializing dashboard immediately');
     try {
         window.dashboard = new Dashboard();

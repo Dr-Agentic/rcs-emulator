@@ -1075,7 +1075,7 @@ function updateCarouselNavigation(carouselId) {
 document.addEventListener('DOMContentLoaded', () => {
     // Add scroll listeners to all carousels
     document.addEventListener('scroll', (e) => {
-        if (e.target.classList.contains('carousel-scroll')) {
+        if (e.target && e.target.classList && e.target.classList.contains('carousel-scroll')) {
             const carousel = e.target.closest('.carousel-container');
             if (carousel) {
                 updateCarouselNavigation(carousel.id);
