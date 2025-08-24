@@ -5,8 +5,9 @@ const path = require('path');
 const url = require('url');
 
 class RCSServer {
-    constructor(port = 3000) {
+    constructor(port = process.env.PORT || 3000) {
         this.port = port;
+        this.host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
         this.validApiKey = 'rcs_demo_key_12345'; // In production, this would be stored securely
         this.messageQueue = [];
         this.sseClients = []; // Store SSE connections
@@ -301,11 +302,20 @@ class RCSServer {
     }
 
     start() {
-        this.server.listen(this.port, () => {
-            console.log(`🚀 RCS Emulator SaaS Server running on http://localhost:${this.port}`);
-            console.log(`📱 Access the emulator at: http://localhost:${this.port}`);
-            console.log(`📚 API Documentation: http://localhost:${this.port}/dashboard.html#api-docs`);
+        this.server.listen(this.port, this.host, () => {
+            console.log(`🚀 RCS Emulator SaaS Server running on http://${this.host}:${this.port}`);
+            console.log(`📱 Environment: ${process.env.NODE_ENV || 'development'}`);
+            console.log(`📱 Access the emulator at: http://${this.host}:${this.port}`);
+            console.log(`📚 API Documentation: http://${this.host}:${this.port}/dashboard.html#api-docs`);
             console.log(`🔑 Demo credentials: user/user`);
+        });
+        
+        // Graceful shutdown
+        process.on('SIGTERM', () => {
+            console.log('SIGTERM received, shutting down gracefully');
+            this.server.close(() => {
+                console.log('Process terminated');
+            });
         });
     }
 

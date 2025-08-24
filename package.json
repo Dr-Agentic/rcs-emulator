@@ -1,0 +1,28 @@
+{
+  "name": "rcs-emulator-saas",
+  "version": "1.0.0",
+  "description": "RCS (Rich Communication Services) business messaging development platform with iPhone 16 Pro Max emulation",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "echo 'No build step needed'"
+  },
+  "keywords": [
+    "rcs",
+    "messaging",
+    "emulator",
+    "saas",
+    "api",
+    "business-messaging"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/rcs-emulator-saas.git"
+  }
+}
