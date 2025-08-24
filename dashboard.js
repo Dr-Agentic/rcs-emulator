@@ -204,6 +204,48 @@ class Dashboard {
                 text: "Big Buck Bunny - Sample video clip 🎬",
                 sender: "business"
             },
+            carousel: {
+                type: "carousel",
+                cards: [
+                    {
+                        title: "iPhone 15 Pro",
+                        description: "Titanium design with A17 Pro chip",
+                        image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=300&h=200&fit=crop",
+                        actions: [
+                            { label: "Buy Now", action: "buy_iphone", type: "primary" },
+                            { label: "Learn More", action: "learn_more", type: "secondary" }
+                        ]
+                    },
+                    {
+                        title: "MacBook Pro",
+                        description: "M3 chip delivers exceptional performance",
+                        image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=300&h=200&fit=crop",
+                        actions: [
+                            { label: "Configure", action: "configure_mac", type: "primary" },
+                            { label: "Compare", action: "compare_mac", type: "secondary" }
+                        ]
+                    },
+                    {
+                        title: "iPad Air",
+                        description: "Light, versatile, and powerful",
+                        image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=300&h=200&fit=crop",
+                        actions: [
+                            { label: "Shop iPad", action: "shop_ipad", type: "primary" },
+                            { label: "Accessories", action: "ipad_accessories", type: "secondary" }
+                        ]
+                    },
+                    {
+                        title: "Apple Watch",
+                        description: "Your health companion on your wrist",
+                        image: "https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?w=300&h=200&fit=crop",
+                        actions: [
+                            { label: "Buy Watch", action: "buy_watch", type: "primary" },
+                            { label: "Try On", action: "try_watch", type: "secondary" }
+                        ]
+                    }
+                ],
+                sender: "business"
+            },
             suggestedActions: {
                 type: "text",
                 text: "What would you like to do today?",

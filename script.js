@@ -172,6 +172,14 @@ class RCSEmulator {
                 </div>
                 ${statusHTML}
             `;
+        } else if (message.carousel) {
+            messageElement.innerHTML = `
+                <div class="message-content">
+                    ${this.renderCarousel(message.carousel)}
+                    <div class="message-time">${timeString}</div>
+                </div>
+                ${statusHTML}
+            `;
         } else {
             messageElement.innerHTML = `
                 <div class="message-content">
@@ -210,6 +218,44 @@ class RCSEmulator {
             default:
                 return '';
         }
+    }
+
+    renderCarousel(carousel) {
+        const carouselId = `carousel_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        
+        return `
+            <div class="carousel-container" id="${carouselId}">
+                <div class="carousel-nav-left" onclick="scrollCarousel('${carouselId}', 'left')">
+                    <div class="carousel-arrow">◀</div>
+                </div>
+                <div class="carousel-scroll">
+                    ${carousel.cards.map((card, index) => `
+                        <div class="carousel-card" data-index="${index}">
+                            ${card.image ? `<img src="${card.image}" alt="${card.title || 'Card image'}" class="carousel-image">` : ''}
+                            <div class="carousel-content">
+                                ${card.title ? `<h3 class="carousel-title">${this.escapeHtml(card.title)}</h3>` : ''}
+                                ${card.description ? `<p class="carousel-description">${this.escapeHtml(card.description)}</p>` : ''}
+                                ${card.actions && card.actions.length > 0 ? `
+                                    <div class="carousel-actions">
+                                        ${card.actions.map(action => 
+                                            `<button class="carousel-action ${action.type || ''}" onclick="handleRichCardAction('${action.action}', {cardTitle: '${card.title}', cardIndex: ${index}})">${this.escapeHtml(action.label)}</button>`
+                                        ).join('')}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="carousel-nav-right" onclick="scrollCarousel('${carouselId}', 'right')">
+                    <div class="carousel-arrow">▶</div>
+                </div>
+                <div class="carousel-indicators">
+                    ${carousel.cards.map((_, index) => `
+                        <div class="carousel-dot ${index === 0 ? 'active' : ''}" onclick="scrollCarouselToCard('${carouselId}', ${index})"></div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
     }
 
     renderRichCard(card) {
@@ -615,6 +661,15 @@ class RCSEmulator {
                     }
                 };
                 
+            case 'carousel':
+                return {
+                    ...baseMessage,
+                    text: '',
+                    carousel: {
+                        cards: apiMsg.cards || []
+                    }
+                };
+                
             case 'media':
                 return {
                     ...baseMessage,
@@ -950,3 +1005,81 @@ class DeveloperPanel {
         this.jsonStatus.textContent = '';
     }
 }
+
+// Carousel navigation functions
+window.scrollCarousel = function(carouselId, direction) {
+    const carousel = document.getElementById(carouselId);
+    if (!carousel) return;
+    
+    const scrollContainer = carousel.querySelector('.carousel-scroll');
+    const cardWidth = 292; // 280px card + 12px gap
+    const currentScroll = scrollContainer.scrollLeft;
+    
+    if (direction === 'left') {
+        scrollContainer.scrollTo({
+            left: Math.max(0, currentScroll - cardWidth),
+            behavior: 'smooth'
+        });
+    } else {
+        scrollContainer.scrollTo({
+            left: currentScroll + cardWidth,
+            behavior: 'smooth'
+        });
+    }
+    
+    // Update navigation arrows and indicators after scroll
+    setTimeout(() => updateCarouselNavigation(carouselId), 300);
+};
+
+window.scrollCarouselToCard = function(carouselId, cardIndex) {
+    const carousel = document.getElementById(carouselId);
+    if (!carousel) return;
+    
+    const scrollContainer = carousel.querySelector('.carousel-scroll');
+    const cardWidth = 292; // 280px card + 12px gap
+    
+    scrollContainer.scrollTo({
+        left: cardIndex * cardWidth,
+        behavior: 'smooth'
+    });
+    
+    // Update indicators
+    setTimeout(() => updateCarouselNavigation(carouselId), 300);
+};
+
+function updateCarouselNavigation(carouselId) {
+    const carousel = document.getElementById(carouselId);
+    if (!carousel) return;
+    
+    const scrollContainer = carousel.querySelector('.carousel-scroll');
+    const leftArrow = carousel.querySelector('.carousel-nav-left');
+    const rightArrow = carousel.querySelector('.carousel-nav-right');
+    const dots = carousel.querySelectorAll('.carousel-dot');
+    
+    const scrollLeft = scrollContainer.scrollLeft;
+    const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+    const cardWidth = 292;
+    const currentCard = Math.round(scrollLeft / cardWidth);
+    
+    // Update arrow visibility
+    leftArrow.style.opacity = scrollLeft > 10 ? '1' : '0';
+    rightArrow.style.opacity = scrollLeft < maxScroll - 10 ? '1' : '0';
+    
+    // Update dot indicators
+    dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentCard);
+    });
+}
+
+// Initialize carousel navigation on scroll
+document.addEventListener('DOMContentLoaded', () => {
+    // Add scroll listeners to all carousels
+    document.addEventListener('scroll', (e) => {
+        if (e.target.classList.contains('carousel-scroll')) {
+            const carousel = e.target.closest('.carousel-container');
+            if (carousel) {
+                updateCarouselNavigation(carousel.id);
+            }
+        }
+    }, true);
+});
