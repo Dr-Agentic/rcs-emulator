@@ -702,23 +702,34 @@ class Dashboard {
     }
 
     loadUserData() {
+        console.log('Loading user data...');
+        
         // Try to get data from AuthSystem first
         let userData = null;
         let apiKey = null;
         
+        console.log('Checking AuthSystem:', !!window.AuthSystem);
         if (window.AuthSystem) {
             userData = window.AuthSystem.getCurrentUser();
             apiKey = window.AuthSystem.getApiKey();
+            console.log('AuthSystem provided:', { userData: !!userData, apiKey: !!apiKey });
         }
         
         // Fallback to localStorage if AuthSystem not available
         if (!userData || !apiKey) {
+            console.log('Checking localStorage...');
             const storedUserData = localStorage.getItem('rcs_user');
             const storedApiKey = localStorage.getItem('rcs_api_key');
+            
+            console.log('LocalStorage has:', { 
+                userData: !!storedUserData, 
+                apiKey: !!storedApiKey 
+            });
             
             if (storedUserData) {
                 try {
                     userData = JSON.parse(storedUserData);
+                    console.log('Parsed user data:', userData);
                 } catch (e) {
                     console.error('Error parsing stored user data:', e);
                 }
@@ -726,7 +737,17 @@ class Dashboard {
             
             if (storedApiKey) {
                 apiKey = storedApiKey;
+                console.log('Found stored API key:', apiKey.substring(0, 8) + '...');
             }
+        }
+        
+        // Generate API key if none found
+        if (!apiKey) {
+            console.log('No API key found, generating demo key...');
+            apiKey = 'rcs_demo_key_12345';
+            // Store it for future use
+            localStorage.setItem('rcs_api_key', apiKey);
+            console.log('Generated and stored demo API key');
         }
         
         // Set user data in UI
@@ -760,22 +781,33 @@ class Dashboard {
             });
         }
 
-        // Set API key
-        if (apiKey) {
-            const apiKeyElements = document.querySelectorAll('#apiKeyDisplay, #settingsApiKey');
-            apiKeyElements.forEach(el => {
-                if (el) el.textContent = apiKey;
-            });
-            console.log('API key loaded:', apiKey.substring(0, 8) + '...');
-        } else {
-            console.warn('No API key found');
-            // Set a demo key as fallback
-            const demoApiKey = 'demo-api-key-12345';
-            const apiKeyElements = document.querySelectorAll('#apiKeyDisplay, #settingsApiKey');
-            apiKeyElements.forEach(el => {
-                if (el) el.textContent = demoApiKey;
-            });
+        // Set API key - this should always work now
+        console.log('Setting API key in UI elements...');
+        const apiKeyElements = document.querySelectorAll('#apiKeyDisplay, #settingsApiKey');
+        console.log('Found API key elements:', apiKeyElements.length);
+        
+        apiKeyElements.forEach((el, index) => {
+            if (el) {
+                el.textContent = apiKey;
+                console.log(`Updated API key element ${index} (${el.id}):`, apiKey.substring(0, 8) + '...');
+            } else {
+                console.warn(`API key element ${index} is null`);
+            }
+        });
+        
+        if (apiKeyElements.length === 0) {
+            console.error('No API key elements found in DOM!');
+            // Try to find them with a delay
+            setTimeout(() => {
+                const delayedElements = document.querySelectorAll('#apiKeyDisplay, #settingsApiKey');
+                console.log('Delayed search found:', delayedElements.length, 'API key elements');
+                delayedElements.forEach(el => {
+                    if (el) el.textContent = apiKey;
+                });
+            }, 1000);
         }
+        
+        console.log('API key loading complete:', apiKey.substring(0, 8) + '...');
 
         // Set message count
         const messagesCount = document.getElementById('messagesCount');
