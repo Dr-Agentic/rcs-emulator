@@ -657,8 +657,8 @@ class TabManager {
     }
 
     initializeTabs() {
-        const tabButtons = document.querySelectorAll('.nav-tab');
-        const tabContents = document.querySelectorAll('.tab-content');
+        const tabButtons = document.querySelectorAll('.menu-item');
+        const tabContents = document.querySelectorAll('.tab-pane');
 
         tabButtons.forEach(button => {
             button.addEventListener('click', () => {
@@ -670,7 +670,7 @@ class TabManager {
                 
                 // Add active class to clicked button and corresponding content
                 button.classList.add('active');
-                document.getElementById(`${targetTab}-tab`).classList.add('active');
+                document.getElementById(targetTab).classList.add('active');
             });
         });
     }
@@ -877,11 +877,11 @@ class DeveloperPanel {
 
     showStatus(message, type) {
         this.jsonStatus.textContent = message;
-        this.jsonStatus.className = `json-status ${type}`;
+        this.jsonStatus.className = `status-message ${type}`;
     }
 
     clearStatus() {
-        this.jsonStatus.className = 'json-status';
+        this.jsonStatus.className = 'status-message';
         this.jsonStatus.textContent = '';
     }
 }
