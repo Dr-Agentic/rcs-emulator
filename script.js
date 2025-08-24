@@ -650,10 +650,37 @@ window.sendSuggestedAction = function(text) {
     }
 };
 
+// Tab functionality
+class TabManager {
+    constructor() {
+        this.initializeTabs();
+    }
+
+    initializeTabs() {
+        const tabButtons = document.querySelectorAll('.nav-tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const targetTab = button.dataset.tab;
+                
+                // Remove active class from all buttons and contents
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                // Add active class to clicked button and corresponding content
+                button.classList.add('active');
+                document.getElementById(`${targetTab}-tab`).classList.add('active');
+            });
+        });
+    }
+}
+
 // Initialize the RCS Emulator when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     window.rcsEmulator = new RCSEmulator();
     window.developerPanel = new DeveloperPanel();
+    window.tabManager = new TabManager();
 });
 
 // Developer Panel Class
