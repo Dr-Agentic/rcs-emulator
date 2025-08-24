@@ -259,8 +259,25 @@ class Dashboard {
         const testServerBtn = document.getElementById('testServerBtn');
         const saveServerBtn = document.getElementById('saveServerBtn');
         const serverStatus = document.getElementById('serverStatus');
+        const toggleHeader = document.getElementById('serverConfigToggle');
+        const content = document.getElementById('serverConfigContent');
         
-        if (!serverUrlInput || !testServerBtn || !saveServerBtn) return;
+        if (!serverUrlInput || !testServerBtn || !saveServerBtn || !toggleHeader || !content) return;
+        
+        // Setup collapsible functionality
+        toggleHeader.addEventListener('click', () => {
+            const isExpanded = toggleHeader.classList.contains('expanded');
+            
+            if (isExpanded) {
+                // Collapse
+                toggleHeader.classList.remove('expanded');
+                content.style.display = 'none';
+            } else {
+                // Expand
+                toggleHeader.classList.add('expanded');
+                content.style.display = 'block';
+            }
+        });
         
         // Load saved configuration
         this.loadServerConfig();
