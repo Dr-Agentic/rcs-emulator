@@ -47,6 +47,9 @@ class Dashboard {
         // Setup copy buttons for API keys
         this.setupCopyButtons();
         
+        // Setup example buttons
+        this.setupExampleButtons();
+        
         // Show default section
         this.showSection('emulator');
     }
@@ -134,7 +137,118 @@ class Dashboard {
         return 'YOUR_API_KEY';
     }
 
-    setupCopyButtons() {
+    setupExampleButtons() {
+        const exampleButtons = document.querySelectorAll('.example-btn');
+        const jsonInput = document.getElementById('jsonInput');
+        
+        if (!jsonInput) return;
+        
+        const examples = {
+            text: {
+                type: "text",
+                text: "Hello! This is a simple RCS text message. 👋",
+                sender: "business"
+            },
+            richCard: {
+                type: "richCard",
+                title: "iPhone 15 Pro",
+                description: "Experience the titanium iPhone 15 Pro with Action Button, powerful A17 Pro chip, and pro camera system.",
+                image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=300&h=200&fit=crop",
+                actions: [
+                    {
+                        label: "Buy Now",
+                        action: "buy_iphone",
+                        type: "primary"
+                    },
+                    {
+                        label: "Learn More",
+                        action: "learn_more",
+                        type: "secondary"
+                    }
+                ],
+                sender: "business"
+            },
+            coffeeCard: {
+                type: "richCard",
+                title: "Coffee Time ☕",
+                description: "Start your morning with the perfect cup of coffee. Fresh roasted beans delivered to your door.",
+                image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&h=200&fit=crop",
+                actions: [
+                    {
+                        label: "Order Coffee",
+                        action: "order_coffee",
+                        type: "primary"
+                    },
+                    {
+                        label: "View Menu",
+                        action: "view_menu",
+                        type: "secondary"
+                    }
+                ],
+                sender: "business"
+            },
+            media: {
+                type: "media",
+                mediaType: "image",
+                url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&h=200&fit=crop",
+                text: "Stunning mountain landscape from Unsplash 🏔️",
+                sender: "business"
+            },
+            video: {
+                type: "media",
+                mediaType: "video",
+                url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                text: "Big Buck Bunny - Sample video clip 🎬",
+                sender: "business"
+            },
+            suggestedActions: {
+                type: "text",
+                text: "What would you like to do today?",
+                suggestedActions: [
+                    {
+                        label: "📱 View Products",
+                        action: "view_products"
+                    },
+                    {
+                        label: "🛒 Place Order",
+                        action: "place_order"
+                    },
+                    {
+                        label: "📞 Contact Support",
+                        action: "contact_support"
+                    },
+                    {
+                        label: "📍 Find Store",
+                        action: "find_store"
+                    }
+                ],
+                sender: "business"
+            }
+        };
+        
+        exampleButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const exampleType = button.getAttribute('data-example');
+                const example = examples[exampleType];
+                
+                if (example) {
+                    // Format JSON with proper indentation
+                    const formattedJson = JSON.stringify(example, null, 2);
+                    jsonInput.value = formattedJson;
+                    
+                    // Trigger input event to update curl command
+                    jsonInput.dispatchEvent(new Event('input'));
+                    
+                    // Show success feedback
+                    this.showToast(`${button.textContent} example loaded!`, 'success');
+                    
+                    // Scroll to JSON input
+                    jsonInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        });
+    }
         // Handle API key copy buttons
         const copyButtons = document.querySelectorAll('#copyApiKey, #copySettingsApiKey');
         copyButtons.forEach(btn => {
