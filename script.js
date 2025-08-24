@@ -173,6 +173,7 @@ class RCSEmulator {
                 ${statusHTML}
             `;
         } else if (message.carousel) {
+            messageElement.classList.add('carousel-message');
             messageElement.innerHTML = `
                 <div class="message-content">
                     ${this.renderCarousel(message.carousel)}
@@ -279,7 +280,7 @@ class RCSEmulator {
         return `
             <div class="suggested-actions">
                 ${actions.map(action => 
-                    `<button class="suggested-action" onclick="sendSuggestedAction('${action.text}')">${action.text}</button>`
+                    `<button class="suggested-action" onclick="sendSuggestedAction('${action.label || action.text}', '${action.action || ''}')">${action.label || action.text}</button>`
                 ).join('')}
             </div>
         `;
@@ -596,15 +597,15 @@ class RCSEmulator {
             // Add suggested actions for certain responses
             if (text.includes('pricing')) {
                 message.suggestedActions = [
-                    { text: 'View Pricing' },
-                    { text: 'Schedule Demo' },
-                    { text: 'Contact Sales' }
+                    { label: 'View Pricing', action: 'view_pricing' },
+                    { label: 'Schedule Demo', action: 'schedule_demo' },
+                    { label: 'Contact Sales', action: 'contact_sales' }
                 ];
             } else if (text.includes('help')) {
                 message.suggestedActions = [
-                    { text: 'Product Info' },
-                    { text: 'Technical Support' },
-                    { text: 'Billing Questions' }
+                    { label: 'Product Info', action: 'product_info' },
+                    { label: 'Technical Support', action: 'tech_support' },
+                    { label: 'Billing Questions', action: 'billing_questions' }
                 ];
             }
 
@@ -692,17 +693,18 @@ class RCSEmulator {
     }
 
     addSystemMessage() {
-        // Add RCS features indicator
-        const featuresMessage = {
+        // Add welcome message using proper RCS method chain
+        const welcomeMessage = {
             id: Date.now(),
-            text: 'RCS Features Active: ✓ Read Receipts ✓ Typing Indicators ✓ Rich Media ✓ Suggested Actions',
+            text: 'Welcome to RCS Emulator SaaS! 🎉',
             type: 'received',
             timestamp: new Date()
         };
 
+        // Use the same method chain as API calls
         setTimeout(() => {
-            this.addMessage(featuresMessage);
-        }, 1000);
+            this.addMessage(welcomeMessage);
+        }, 500);
     }
 }
 
@@ -754,13 +756,14 @@ window.handleRichCardAction = function(action, context = {}) {
     }
 };
 
-window.sendSuggestedAction = function(text) {
+window.sendSuggestedAction = function(text, action = '') {
     if (window.rcsEmulator) {
         // Send interaction to configured server
         window.rcsEmulator.sendUserInteraction({
             type: 'action',
             actionType: 'suggested_action',
             text: text,
+            action: action,
             userId: window.rcsEmulator.getUserId()
         });
         
@@ -950,10 +953,7 @@ class DeveloperPanel {
                 window.rcsEmulator.addMessage(message);
                 this.showStatus('✅ Message sent to phone successfully!', 'success');
                 
-                // Auto-clear after successful send
-                setTimeout(() => {
-                    this.clearInput();
-                }, 2000);
+                // Keep JSON in panel for easy iteration and debugging
             } else {
                 this.showStatus('Error: RCS Emulator not found.', 'error');
             }

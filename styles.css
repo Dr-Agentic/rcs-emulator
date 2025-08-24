@@ -1232,6 +1232,15 @@ body {
     max-width: 320px;
 }
 
+/* Carousel Messages - Balanced width for navigation */
+.message.carousel-message {
+    max-width: 380px !important; /* Just enough for one card + navigation space */
+}
+
+.message.carousel-message .message-content {
+    max-width: 380px !important;
+}
+
 .rich-card-content {
     background: #ffffff;
     border-radius: 12px;
@@ -1390,6 +1399,7 @@ body {
 .carousel-container {
     position: relative;
     width: 100%;
+    max-width: 380px; /* Balanced width for single card + navigation */
     margin: 8px 0;
 }
 
@@ -1398,7 +1408,7 @@ body {
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     gap: 12px;
-    padding: 0 4px;
+    padding: 0 36px; /* Balanced padding for arrow space */
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
@@ -1408,7 +1418,7 @@ body {
 }
 
 .carousel-card {
-    flex: 0 0 280px;
+    flex: 0 0 280px; /* Keep same card width as rich cards */
     background: #ffffff;
     border-radius: 12px;
     border: 1px solid #e5e5e7;
@@ -1424,17 +1434,17 @@ body {
 
 .carousel-image {
     width: 100%;
-    height: 160px;
+    height: 160px; /* Same as rich card image height */
     object-fit: cover;
     display: block;
 }
 
 .carousel-content {
-    padding: 16px;
+    padding: 16px; /* Same as rich card padding */
 }
 
 .carousel-title {
-    font-size: 16px;
+    font-size: 16px; /* Same as rich card title */
     font-weight: 600;
     color: #1d1d1f;
     margin: 0 0 8px 0;
@@ -1442,7 +1452,7 @@ body {
 }
 
 .carousel-description {
-    font-size: 14px;
+    font-size: 14px; /* Same as rich card description */
     color: #6e6e73;
     margin: 0 0 16px 0;
     line-height: 1.4;
@@ -1455,7 +1465,7 @@ body {
 }
 
 .carousel-action {
-    padding: 8px 16px;
+    padding: 8px 16px; /* Same as rich card actions */
     border: none;
     border-radius: 20px;
     font-size: 14px;
@@ -1491,9 +1501,9 @@ body {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    width: 32px;
-    height: 32px;
-    background: rgba(0, 0, 0, 0.3);
+    width: 36px; /* Slightly larger for better visibility */
+    height: 36px;
+    background: rgba(0, 0, 0, 0.4);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -1506,22 +1516,22 @@ body {
 }
 
 .carousel-nav-left {
-    left: 8px;
+    left: 8px; /* Positioned in the padding space */
 }
 
 .carousel-nav-right {
-    right: 8px;
+    right: 8px; /* Positioned in the padding space */
 }
 
 .carousel-nav-left:hover,
 .carousel-nav-right:hover {
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6);
     transform: translateY(-50%) scale(1.1);
 }
 
 .carousel-arrow {
     color: white;
-    font-size: 14px;
+    font-size: 16px; /* Slightly larger arrow */
     font-weight: bold;
 }
 
@@ -1553,13 +1563,21 @@ body {
 
 /* Mobile optimizations */
 @media (max-width: 768px) {
+    .carousel-container {
+        max-width: 100%;
+    }
+    
+    .carousel-scroll {
+        padding: 0 4px; /* Reduce padding on mobile */
+    }
+    
     .carousel-card {
-        flex: 0 0 260px;
+        flex: 0 0 260px; /* Slightly smaller on mobile */
     }
     
     .carousel-nav-left,
     .carousel-nav-right {
-        display: none;
+        display: none; /* Hide arrows on mobile, use swipe */
     }
 }
 
