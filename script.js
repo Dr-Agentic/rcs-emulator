@@ -885,28 +885,3 @@ class DeveloperPanel {
         this.jsonStatus.textContent = '';
     }
 }
-
-// Add some demo functionality
-document.addEventListener('DOMContentLoaded', () => {
-    // Add demo rich card after 5 seconds
-    setTimeout(() => {
-        if (window.rcsEmulator) {
-            const richCardMessage = {
-                id: Date.now(),
-                text: '',
-                type: 'received',
-                timestamp: new Date(),
-                richCard: {
-                    title: 'Special Offer! 🎉',
-                    description: 'Get 20% off your first order. Limited time offer!',
-                    image: 'https://via.placeholder.com/300x160/FF6B6B/FFFFFF?text=20%25+OFF',
-                    actions: [
-                        { label: 'Shop Now', action: 'shop_now', type: 'primary' },
-                        { label: 'Learn More', action: 'learn_more', type: 'secondary' }
-                    ]
-                }
-            };
-            window.rcsEmulator.addMessage(richCardMessage);
-        }
-    }, 5000);
-});
