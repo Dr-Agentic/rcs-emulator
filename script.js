@@ -1,4 +1,6 @@
 // RCS Emulator JavaScript
+// MessageFormatHandler will be available as global after script loads
+
 class RCSEmulator {
     constructor() {
         this.messages = [];
@@ -556,59 +558,20 @@ class RCSEmulator {
     }
 
     convertApiToUIMessage(apiMsg) {
-        const baseMessage = {
-            id: apiMsg.id,
-            timestamp: new Date(apiMsg.timestamp),
-            type: 'received' // API messages are always received from business
-        };
-
-        switch (apiMsg.type) {
-            case 'text':
-                return {
-                    ...baseMessage,
-                    text: apiMsg.text,
-                    suggestedActions: apiMsg.suggestedActions
-                };
-                
-            case 'richCard':
-                return {
-                    ...baseMessage,
-                    text: '',
-                    richCard: {
-                        title: apiMsg.title,
-                        description: apiMsg.description,
-                        image: apiMsg.image,
-                        actions: apiMsg.actions || []
-                    }
-                };
-                
-            case 'carousel':
-                return {
-                    ...baseMessage,
-                    text: '',
-                    carousel: {
-                        cards: apiMsg.cards || []
-                    }
-                };
-                
-            case 'media':
-                return {
-                    ...baseMessage,
-                    text: apiMsg.text || '',
-                    media: {
-                        type: apiMsg.mediaType,
-                        url: apiMsg.url,
-                        name: apiMsg.name || `media_${Date.now()}`,
-                        size: apiMsg.size || 1024000
-                    }
-                };
-                
-            default:
-                // For unknown types, treat as text
-                return {
-                    ...baseMessage,
-                    text: apiMsg.text || JSON.stringify(apiMsg)
-                };
+        try {
+            // Use universal message format handler
+            const parsedMessage = MessageFormatHandler.parseMessage(apiMsg);
+            const sender = apiMsg.sender || 'business';
+            return MessageFormatHandler.convertToUIMessage(parsedMessage, sender);
+        } catch (error) {
+            console.error('Message parsing error:', error);
+            // Fallback to simple text message
+            return {
+                id: Date.now() + Math.random(),
+                timestamp: new Date(),
+                type: 'received',
+                text: `Error parsing message: ${error.message}`
+            };
         }
     }
 
@@ -801,63 +764,19 @@ class DeveloperPanel {
         try {
             const parsed = JSON.parse(jsonText);
             
-            // Validate required fields
-            if (!parsed.type) {
-                this.showStatus('Error: "type" field is required.', 'error');
-                return false;
-            }
-
-            // Validate based on type
-            const isValid = this.validateMessageType(parsed);
+            // Use universal format handler for validation
+            const format = MessageFormatHandler.detectMessageFormat(parsed);
+            const parsedMessage = MessageFormatHandler.parseMessage(parsed);
             
-            if (isValid) {
-                this.showStatus('✅ JSON is valid and ready to send!', 'success');
-                this.sendJsonBtn.disabled = false;
-                return true;
-            }
+            this.showStatus(`✅ Valid ${format} format message ready to send!`, 'success');
+            this.sendJsonBtn.disabled = false;
+            return true;
             
         } catch (error) {
-            this.showStatus(`JSON Parse Error: ${error.message}`, 'error');
+            this.showStatus(`Validation Error: ${error.message}`, 'error');
+            this.sendJsonBtn.disabled = true;
             return false;
         }
-    }
-
-    validateMessageType(message) {
-        switch (message.type) {
-            case 'text':
-                if (!message.text) {
-                    this.showStatus('Error: Text messages require a "text" field.', 'error');
-                    return false;
-                }
-                break;
-                
-            case 'richCard':
-                if (!message.title || !message.description) {
-                    this.showStatus('Error: Rich cards require "title" and "description" fields.', 'error');
-                    return false;
-                }
-                if (message.actions && !Array.isArray(message.actions)) {
-                    this.showStatus('Error: "actions" must be an array.', 'error');
-                    return false;
-                }
-                break;
-                
-            case 'media':
-                if (!message.mediaType || !message.url) {
-                    this.showStatus('Error: Media messages require "mediaType" and "url" fields.', 'error');
-                    return false;
-                }
-                if (!['image', 'video', 'document'].includes(message.mediaType)) {
-                    this.showStatus('Error: mediaType must be "image", "video", or "document".', 'error');
-                    return false;
-                }
-                break;
-                
-            default:
-                this.showStatus(`Warning: Unknown message type "${message.type}". Proceeding anyway.`, 'success');
-        }
-        
-        return true;
     }
 
     sendJSONMessage() {

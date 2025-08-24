@@ -3,6 +3,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
+const MessageFormatHandler = require('./MessageFormatHandler.js');
 
 class RCSServer {
     constructor(port = process.env.PORT || 3000) {
@@ -196,32 +197,8 @@ class RCSServer {
     }
 
     validateMessageData(data) {
-        if (!data.type) {
-            return 'Message type is required';
-        }
-
-        switch (data.type) {
-            case 'text':
-                if (!data.text) {
-                    return 'Text field is required for text messages';
-                }
-                break;
-            case 'richCard':
-                if (!data.title || !data.description) {
-                    return 'Title and description are required for rich cards';
-                }
-                break;
-            case 'media':
-                if (!data.mediaType || !data.url) {
-                    return 'MediaType and URL are required for media messages';
-                }
-                if (!['image', 'video', 'document'].includes(data.mediaType)) {
-                    return 'MediaType must be image, video, or document';
-                }
-                break;
-        }
-
-        return null; // No validation errors
+        // Use universal message format handler
+        return MessageFormatHandler.validateMessageData(data);
     }
 
     generateApiKey() {
