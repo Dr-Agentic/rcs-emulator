@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RCS Emulator - iPhone 16 Pro Max</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="main-container">
+        <!-- Developer Panel -->
+        <div class="developer-panel">
+            <div class="panel-header">
+                <h2>RCS Developer Panel</h2>
+                <p>Paste JSON RCS messages to test on the emulator</p>
+            </div>
+            
+            <div class="json-input-section">
+                <label for="jsonInput">RCS Message JSON:</label>
+                <textarea 
+                    id="jsonInput" 
+                    placeholder='Paste your RCS JSON message here, e.g.:
+{
+  "type": "text",
+  "text": "Hello from RCS!",
+  "sender": "business"
+}
+
+or
+
+{
+  "type": "richCard",
+  "title": "Product Showcase",
+  "description": "Check out our latest product!",
+  "image": "https://example.com/image.jpg",
+  "actions": [
+    {"label": "Buy Now", "action": "buy_now", "type": "primary"},
+    {"label": "Learn More", "action": "learn_more", "type": "secondary"}
+  ]
+}'
+                    rows="15"
+                ></textarea>
+                <div class="json-controls">
+                    <button id="sendJsonBtn" class="send-btn-panel">Send to Phone</button>
+                </div>
+                <div id="jsonStatus" class="json-status"></div>
+            </div>
+
+            <div class="examples-section">
+                <h3>Example RCS Messages</h3>
+                <div class="example-buttons">
+                    <button class="example-btn" data-example="text">Simple Text</button>
+                    <button class="example-btn" data-example="richCard">Rich Card</button>
+                    <button class="example-btn" data-example="suggestedActions">Suggested Actions</button>
+                    <button class="example-btn" data-example="media">Media Message</button>
+                </div>
+            </div>
+
+            <div class="documentation-section">
+                <h3>RCS Message Schema</h3>
+                <div class="schema-info">
+                    <p><strong>Text Message:</strong></p>
+                    <code>{"type": "text", "text": "message", "sender": "business|user"}</code>
+                    
+                    <p><strong>Rich Card:</strong></p>
+                    <code>{"type": "richCard", "title": "...", "description": "...", "image": "url", "actions": [...]}</code>
+                    
+                    <p><strong>Media Message:</strong></p>
+                    <code>{"type": "media", "mediaType": "image|video|document", "url": "...", "text": "..."}</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phone Emulator -->
+        <div class="device-frame">
+        <div class="screen">
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <div class="status-left">
+                    <span class="time">9:41</span>
+                </div>
+                <div class="status-right">
+                    <div class="signal-bars">
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                    </div>
+                    <div class="wifi-icon">📶</div>
+                    <div class="battery">
+                        <div class="battery-level"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Header -->
+            <div class="nav-header">
+                <button class="back-btn">‹</button>
+                <div class="contact-info">
+                    <div class="contact-avatar">
+                        <img src="https://via.placeholder.com/40x40/007AFF/FFFFFF?text=B" alt="Business Contact">
+                    </div>
+                    <div class="contact-details">
+                        <h3>Business Contact</h3>
+                        <p class="rcs-indicator">RCS • Online</p>
+                    </div>
+                </div>
+                <button class="info-btn">ⓘ</button>
+            </div>
+
+            <!-- Messages Container -->
+            <div class="messages-container" id="messagesContainer">
+                <div class="message-group">
+                    <div class="message received">
+                        <div class="message-content">
+                            <p>Welcome to our RCS business messaging service! 🎉</p>
+                            <div class="message-time">2:30 PM</div>
+                        </div>
+                    </div>
+                    <div class="message received">
+                        <div class="message-content">
+                            <p>How can we help you today?</p>
+                            <div class="message-time">2:30 PM</div>
+                        </div>
+                        <div class="message-status">
+                            <span class="read-receipt">✓✓</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Typing Indicator -->
+            <div class="typing-indicator" id="typingIndicator" style="display: none;">
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <span class="typing-text">Business Contact is typing...</span>
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-area">
+                <div class="input-container">
+                    <button class="attachment-btn" id="attachmentBtn">+</button>
+                    <div class="text-input-wrapper">
+                        <textarea 
+                            id="messageInput" 
+                            placeholder="RCS Message" 
+                            rows="1"
+                            maxlength="8000"
+                        ></textarea>
+                        <div class="input-actions">
+                            <button class="emoji-btn">😊</button>
+                        </div>
+                    </div>
+                    <button class="send-btn" id="sendBtn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Attachment Options -->
+                <div class="attachment-options" id="attachmentOptions" style="display: none;">
+                    <div class="attachment-grid">
+                        <button class="attachment-option" data-type="camera">
+                            <div class="attachment-icon">📷</div>
+                            <span>Camera</span>
+                        </button>
+                        <button class="attachment-option" data-type="photo">
+                            <div class="attachment-icon">🖼️</div>
+                            <span>Photo</span>
+                        </button>
+                        <button class="attachment-option" data-type="video">
+                            <div class="attachment-icon">🎥</div>
+                            <span>Video</span>
+                        </button>
+                        <button class="attachment-option" data-type="document">
+                            <div class="attachment-icon">📄</div>
+                            <span>Document</span>
+                        </button>
+                        <button class="attachment-option" data-type="location">
+                            <div class="attachment-icon">📍</div>
+                            <span>Location</span>
+                        </button>
+                        <button class="attachment-option" data-type="contact">
+                            <div class="attachment-icon">👤</div>
+                            <span>Contact</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- File Input (Hidden) -->
+    <input type="file" id="fileInput" style="display: none;" multiple accept="image/*,video/*,.pdf,.doc,.docx,.txt">
+
+    <script src="script.js"></script>
+</body>
+</html>

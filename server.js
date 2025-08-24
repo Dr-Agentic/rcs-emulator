@@ -1,0 +1,333 @@
+// Simple Node.js server for RCS Emulator SaaS API
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+const url = require('url');
+
+class RCSServer {
+    constructor(port = 3000) {
+        this.port = port;
+        this.validApiKey = 'rcs_demo_key_12345'; // In production, this would be stored securely
+        this.messageQueue = [];
+        this.sseClients = []; // Store SSE connections
+        this.setupServer();
+    }
+
+    setupServer() {
+        this.server = http.createServer((req, res) => {
+            this.handleRequest(req, res);
+        });
+    }
+
+    async handleRequest(req, res) {
+        const parsedUrl = url.parse(req.url, true);
+        const pathname = parsedUrl.pathname;
+        const method = req.method;
+
+        // Enable CORS
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+        // Handle preflight requests
+        if (method === 'OPTIONS') {
+            res.writeHead(200);
+            res.end();
+            return;
+        }
+
+        try {
+            // API Routes
+            if (pathname.startsWith('/api/')) {
+                await this.handleApiRequest(req, res, pathname, method);
+            } else {
+                // Serve static files
+                await this.serveStaticFile(req, res, pathname);
+            }
+        } catch (error) {
+            console.error('Server error:', error);
+            this.sendJsonResponse(res, 500, { error: 'Internal server error' });
+        }
+    }
+
+    async handleApiRequest(req, res, pathname, method) {
+        if (pathname === '/api/rcs/send' && method === 'POST') {
+            await this.handleSendMessage(req, res);
+        } else if (pathname === '/api/rcs/messages' && method === 'GET') {
+            await this.handleGetMessages(req, res);
+        } else if (pathname === '/api/auth/validate' && method === 'POST') {
+            await this.handleValidateAuth(req, res);
+        } else if (pathname === '/api/events' && method === 'GET') {
+            await this.handleSSE(req, res);
+        } else {
+            this.sendJsonResponse(res, 404, { error: 'API endpoint not found' });
+        }
+    }
+
+    async handleSendMessage(req, res) {
+        try {
+            // Get request body
+            const body = await this.getRequestBody(req);
+            const messageData = JSON.parse(body);
+
+            // Validate API key
+            const authHeader = req.headers.authorization;
+            if (!authHeader || !authHeader.startsWith('Bearer ')) {
+                return this.sendJsonResponse(res, 401, { error: 'Missing or invalid authorization header' });
+            }
+
+            const apiKey = authHeader.substring(7);
+            if (!this.validateApiKey(apiKey)) {
+                return this.sendJsonResponse(res, 401, { error: 'Invalid API key' });
+            }
+
+            // Validate message data
+            const validationError = this.validateMessageData(messageData);
+            if (validationError) {
+                return this.sendJsonResponse(res, 400, { error: validationError });
+            }
+
+            // Process message
+            const messageId = Date.now().toString();
+            const processedMessage = {
+                id: messageId,
+                ...messageData,
+                timestamp: new Date().toISOString(),
+                status: 'sent'
+            };
+
+            // Store message in queue (in production, this would be a database)
+            this.messageQueue.push(processedMessage);
+
+            // Send success response
+            this.sendJsonResponse(res, 200, {
+                success: true,
+                messageId: messageId,
+                timestamp: processedMessage.timestamp,
+                message: 'RCS message sent successfully'
+            });
+
+            console.log(`RCS message sent: ${messageId}`, messageData);
+
+            // Broadcast to all connected SSE clients
+            this.broadcastToClients(processedMessage);
+
+        } catch (error) {
+            console.error('Error sending message:', error);
+            this.sendJsonResponse(res, 400, { error: 'Invalid JSON or request format' });
+        }
+    }
+
+    async handleSSE(req, res) {
+        // Set up Server-Sent Events
+        res.writeHead(200, {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Headers': 'Cache-Control'
+        });
+
+        // Add client to the list
+        const clientId = Date.now();
+        const client = { id: clientId, res };
+        this.sseClients.push(client);
+
+        console.log(`SSE client connected: ${clientId}`);
+
+        // Send initial connection message
+        res.write(`data: ${JSON.stringify({ type: 'connected', clientId })}\n\n`);
+
+        // Handle client disconnect
+        req.on('close', () => {
+            console.log(`SSE client disconnected: ${clientId}`);
+            this.sseClients = this.sseClients.filter(c => c.id !== clientId);
+        });
+    }
+
+    broadcastToClients(message) {
+        const data = JSON.stringify({ type: 'newMessage', message });
+        this.sseClients.forEach(client => {
+            try {
+                client.res.write(`data: ${data}\n\n`);
+            } catch (error) {
+                console.error('Error broadcasting to client:', error);
+                // Remove disconnected client
+                this.sseClients = this.sseClients.filter(c => c.id !== client.id);
+            }
+        });
+        console.log(`Broadcasted message to ${this.sseClients.length} clients`);
+    }
+
+    async handleGetMessages(req, res) {
+        // Return recent messages (for debugging/monitoring)
+        const recentMessages = this.messageQueue.slice(-10);
+        this.sendJsonResponse(res, 200, {
+            messages: recentMessages,
+            total: this.messageQueue.length
+        });
+    }
+
+    async handleValidateAuth(req, res) {
+        try {
+            const body = await this.getRequestBody(req);
+            const { username, password } = JSON.parse(body);
+
+            // Simple authentication (in production, use proper authentication)
+            if (username === 'user' && password === 'user') {
+                const apiKey = this.generateApiKey();
+                this.sendJsonResponse(res, 200, {
+                    success: true,
+                    apiKey: apiKey,
+                    user: { username, id: 'user_001' }
+                });
+            } else {
+                this.sendJsonResponse(res, 401, { error: 'Invalid credentials' });
+            }
+        } catch (error) {
+            this.sendJsonResponse(res, 400, { error: 'Invalid request format' });
+        }
+    }
+
+    validateApiKey(apiKey) {
+        // In production, validate against database
+        return apiKey.startsWith('rcs_') && apiKey.length > 10;
+    }
+
+    validateMessageData(data) {
+        if (!data.type) {
+            return 'Message type is required';
+        }
+
+        switch (data.type) {
+            case 'text':
+                if (!data.text) {
+                    return 'Text field is required for text messages';
+                }
+                break;
+            case 'richCard':
+                if (!data.title || !data.description) {
+                    return 'Title and description are required for rich cards';
+                }
+                break;
+            case 'media':
+                if (!data.mediaType || !data.url) {
+                    return 'MediaType and URL are required for media messages';
+                }
+                if (!['image', 'video', 'document'].includes(data.mediaType)) {
+                    return 'MediaType must be image, video, or document';
+                }
+                break;
+        }
+
+        return null; // No validation errors
+    }
+
+    generateApiKey() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = 'rcs_';
+        for (let i = 0; i < 32; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
+    }
+
+    async serveStaticFile(req, res, pathname) {
+        // Default to index.html for root path
+        if (pathname === '/') {
+            pathname = '/login.html';
+        }
+
+        const filePath = path.join(__dirname, pathname);
+        const ext = path.extname(filePath).toLowerCase();
+
+        // Security check - prevent directory traversal
+        if (!filePath.startsWith(__dirname)) {
+            return this.sendResponse(res, 403, 'Forbidden');
+        }
+
+        try {
+            const data = fs.readFileSync(filePath);
+            const contentType = this.getContentType(ext);
+            
+            res.writeHead(200, { 'Content-Type': contentType });
+            res.end(data);
+        } catch (error) {
+            if (error.code === 'ENOENT') {
+                this.sendResponse(res, 404, 'File not found');
+            } else {
+                this.sendResponse(res, 500, 'Server error');
+            }
+        }
+    }
+
+    getContentType(ext) {
+        const types = {
+            '.html': 'text/html',
+            '.css': 'text/css',
+            '.js': 'application/javascript',
+            '.json': 'application/json',
+            '.png': 'image/png',
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.gif': 'image/gif',
+            '.svg': 'image/svg+xml',
+            '.ico': 'image/x-icon'
+        };
+        return types[ext] || 'text/plain';
+    }
+
+    async getRequestBody(req) {
+        return new Promise((resolve, reject) => {
+            let body = '';
+            req.on('data', chunk => {
+                body += chunk.toString();
+            });
+            req.on('end', () => {
+                resolve(body);
+            });
+            req.on('error', reject);
+        });
+    }
+
+    sendJsonResponse(res, statusCode, data) {
+        res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(data));
+    }
+
+    sendResponse(res, statusCode, message) {
+        res.writeHead(statusCode, { 'Content-Type': 'text/plain' });
+        res.end(message);
+    }
+
+    start() {
+        this.server.listen(this.port, () => {
+            console.log(`🚀 RCS Emulator SaaS Server running on http://localhost:${this.port}`);
+            console.log(`📱 Access the emulator at: http://localhost:${this.port}`);
+            console.log(`📚 API Documentation: http://localhost:${this.port}/dashboard.html#api-docs`);
+            console.log(`🔑 Demo credentials: user/user`);
+        });
+    }
+
+    stop() {
+        if (this.server) {
+            this.server.close();
+        }
+    }
+}
+
+// Start server if this file is run directly
+if (require.main === module) {
+    const port = process.env.PORT || 3000;
+    const server = new RCSServer(port);
+    server.start();
+
+    // Graceful shutdown
+    process.on('SIGINT', () => {
+        console.log('\n🛑 Shutting down server...');
+        server.stop();
+        process.exit(0);
+    });
+}
+
+module.exports = RCSServer;
