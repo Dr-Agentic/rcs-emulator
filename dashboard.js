@@ -410,6 +410,10 @@ class Dashboard {
         const apiKey = this.getCurrentApiKey();
         console.log('Using API key:', apiKey.substring(0, 10) + '...');
         
+        // Get the current URL base (works for both localhost and deployed)
+        const baseUrl = window.location.origin;
+        console.log('Using base URL:', baseUrl);
+        
         let jsonData;
         let isValidJson = true;
         
@@ -440,7 +444,7 @@ class Dashboard {
         }
         
         // Format the curl command with proper escaping and line breaks
-        const curlCmd = `curl -X POST http://localhost:3000/api/rcs/send \\
+        const curlCmd = `curl -X POST ${baseUrl}/api/rcs/send \\
   -H "Authorization: Bearer ${apiKey}" \\
   -H "Content-Type: application/json" \\
   -d '${jsonData}'`;
