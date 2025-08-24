@@ -304,22 +304,40 @@ class Dashboard {
         const toggleHeader = document.getElementById('serverConfigToggle');
         const content = document.getElementById('serverConfigContent');
         
-        if (!serverUrlInput || !testServerBtn || !saveServerBtn || !toggleHeader || !content) return;
+        if (!serverUrlInput || !testServerBtn || !saveServerBtn) {
+            console.warn('Server config elements not found');
+            return;
+        }
         
         // Setup collapsible functionality
-        toggleHeader.addEventListener('click', () => {
-            const isExpanded = toggleHeader.classList.contains('expanded');
+        if (toggleHeader && content) {
+            console.log('Setting up collapsible functionality');
+            toggleHeader.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Toggle clicked');
+                const isExpanded = content.style.display === 'block';
+                console.log('Current state - isExpanded:', isExpanded);
+                
+                if (isExpanded) {
+                    // Collapse
+                    console.log('Collapsing');
+                    toggleHeader.classList.remove('expanded');
+                    content.style.display = 'none';
+                } else {
+                    // Expand
+                    console.log('Expanding');
+                    toggleHeader.classList.add('expanded');
+                    content.style.display = 'block';
+                }
+            });
             
-            if (isExpanded) {
-                // Collapse
-                toggleHeader.classList.remove('expanded');
-                content.style.display = 'none';
-            } else {
-                // Expand
-                toggleHeader.classList.add('expanded');
-                content.style.display = 'block';
-            }
-        });
+            // Initialize as collapsed
+            toggleHeader.classList.remove('expanded');
+            content.style.display = 'none';
+            console.log('Initialized as collapsed');
+        } else {
+            console.warn('Collapsible elements not found:', { toggleHeader, content });
+        }
         
         // Load saved configuration
         this.loadServerConfig();

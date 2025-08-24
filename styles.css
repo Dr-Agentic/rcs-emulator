@@ -171,6 +171,7 @@ body {
     cursor: pointer;
     transition: background-color 0.2s ease;
     border-radius: 12px;
+    user-select: none;
 }
 
 .collapsible-header:hover {
@@ -182,12 +183,14 @@ body {
     font-weight: 600;
     color: #1d1d1f;
     margin: 0;
+    pointer-events: none;
 }
 
 .collapse-icon {
     font-size: 14px;
     color: #6e6e73;
     transition: transform 0.2s ease;
+    pointer-events: none;
 }
 
 .collapsible-header.expanded .collapse-icon {
@@ -197,6 +200,7 @@ body {
 .collapsible-content {
     padding: 0 24px 24px 24px;
     transition: all 0.3s ease;
+    overflow: hidden;
 }
 
 .collapsible-content.collapsed {
