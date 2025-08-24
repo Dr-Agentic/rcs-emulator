@@ -9,7 +9,6 @@ class RCSEmulator {
         this.initializeElements();
         this.bindEvents();
         this.updateTime();
-        this.setupAutoResponses();
         this.connectToSSE();
         
         // Initialize with welcome messages
@@ -123,9 +122,6 @@ class RCSEmulator {
         setTimeout(() => this.updateMessageStatus(message.id, 'sent'), 500);
         setTimeout(() => this.updateMessageStatus(message.id, 'delivered'), 1000);
         setTimeout(() => this.updateMessageStatus(message.id, 'read'), 2000);
-
-        // Trigger auto-response
-        this.triggerAutoResponse(text);
     }
 
     addMessage(message) {
@@ -535,82 +531,6 @@ class RCSEmulator {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
-    }
-
-    // Auto-response system for business messaging simulation
-    setupAutoResponses() {
-        this.autoResponses = {
-            'hello': 'Hello! Welcome to our business messaging service. How can I help you today?',
-            'hi': 'Hi there! Thanks for reaching out. What can I do for you?',
-            'help': 'I\'m here to help! You can ask me about our products, services, or support.',
-            'hours': 'Our business hours are Monday-Friday 9AM-6PM PST.',
-            'location': 'We\'re located in San Francisco, CA. Would you like directions?',
-            'price': 'Our pricing varies by service. Would you like me to send you our pricing guide?',
-            'support': 'I\'ll connect you with our support team right away.',
-            'thanks': 'You\'re welcome! Is there anything else I can help you with?',
-            'bye': 'Thank you for contacting us! Have a great day! 👋'
-        };
-    }
-
-    triggerAutoResponse(userMessage) {
-        const lowerMessage = userMessage.toLowerCase();
-        let response = null;
-
-        // Find matching auto-response
-        for (const [keyword, reply] of Object.entries(this.autoResponses)) {
-            if (lowerMessage.includes(keyword)) {
-                response = reply;
-                break;
-            }
-        }
-
-        // Default response if no match
-        if (!response) {
-            const responses = [
-                'Thanks for your message! A team member will get back to you shortly.',
-                'I understand. Let me help you with that.',
-                'That\'s a great question! Let me provide you with more information.',
-                'I\'ll make sure to pass this along to the right department.'
-            ];
-            response = responses[Math.floor(Math.random() * responses.length)];
-        }
-
-        // Send auto-response after delay
-        setTimeout(() => {
-            this.sendAutoResponse(response);
-        }, 1500 + Math.random() * 1000);
-    }
-
-    sendAutoResponse(text) {
-        this.showTypingIndicator();
-
-        setTimeout(() => {
-            this.hideTypingIndicator();
-
-            const message = {
-                id: Date.now(),
-                text: text,
-                type: 'received',
-                timestamp: new Date()
-            };
-
-            // Add suggested actions for certain responses
-            if (text.includes('pricing')) {
-                message.suggestedActions = [
-                    { label: 'View Pricing', action: 'view_pricing' },
-                    { label: 'Schedule Demo', action: 'schedule_demo' },
-                    { label: 'Contact Sales', action: 'contact_sales' }
-                ];
-            } else if (text.includes('help')) {
-                message.suggestedActions = [
-                    { label: 'Product Info', action: 'product_info' },
-                    { label: 'Technical Support', action: 'tech_support' },
-                    { label: 'Billing Questions', action: 'billing_questions' }
-                ];
-            }
-
-            this.addMessage(message);
-        }, 2000 + Math.random() * 1000);
     }
 
     connectToSSE() {
