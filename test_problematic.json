@@ -1,0 +1,28 @@
+{
+  "messages": [
+    {
+      "type": "text",
+      "text": "Hi John! 👋 I noticed you've been researching the BMW X5. Before you decide, let me show you why the Lexus GX 550 might be the smarter choice:"
+    },
+    {
+      "type": "text",
+      "text": "**Special August Offer:** 1.9% APR + $2,000 loyalty bonus\n\n*Experience the difference that 'Relentless Pursuit of Perfection' makes.*",
+      "suggestions": [
+        {
+          "reply": {
+            "text": "📅 Schedule Test Drive",
+            "postbackData": "SCHEDULE_TEST_DRIVE"
+          }
+        },
+        {
+          "action": {
+            "dialerAction": {
+              "phoneNumber": "+15551234567"
+            }
+          },
+          "text": "📱 Call Now"
+        }
+      ]
+    }
+  ]
+}

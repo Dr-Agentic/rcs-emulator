@@ -1,0 +1,48 @@
+{
+  "messages": [
+    {
+      "type": "text",
+      "text": "Hi John! 👋 I noticed you've been researching the BMW X5. Before you decide, let me show you why the Lexus GX 550 might be the smarter choice:"
+    },
+    {
+      "type": "richCard",
+      "richCard": {
+        "standaloneCard": {
+          "cardContent": {
+            "title": "2024 Lexus GX 550 Overtrail",
+            "description": "The GX is built tough with true luxury inside. A direct rival to the BMW X5 with proven off-road heritage.",
+            "media": {
+              "height": "TALL",
+              "contentInfo": {
+                "fileUrl": "https://lexus-cms-media.s3.us-east-2.amazonaws.com/wp-content/uploads/2024/03/2024_GX550_Overtrail_Hero_400x300.jpg",
+                "altText": "2024 Lexus GX 550 Overtrail - Official Press Image"
+              }
+            },
+            "suggestions": [
+              {
+                "reply": {
+                  "text": "📅 Schedule Test Drive",
+                  "postbackData": "SCHEDULE_TEST_DRIVE"
+                }
+              },
+              {
+                "action": {
+                  "urlAction": {
+                    "openUrl": {
+                      "url": "https://www.lexus.com/models/GX/build-price"
+                    }
+                  }
+                },
+                "text": "💰 Get Quote"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "text",
+      "text": "**Special August Offer:** 1.9% APR + $2,000 loyalty bonus\n\n*Experience the difference that 'Relentless Pursuit of Perfection' makes.*"
+    }
+  ]
+}

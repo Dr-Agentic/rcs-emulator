@@ -818,10 +818,13 @@ class Dashboard {
         }
         
         // Format the curl command with proper escaping and line breaks
+        // Escape single quotes in JSON data for shell compatibility
+        const escapedJsonData = jsonData.replace(/'/g, "'\\''");
+        
         const curlCmd = `curl -X POST ${baseUrl}/api/rcs/send \\
   -H "Authorization: Bearer ${apiKey}" \\
   -H "Content-Type: application/json" \\
-  -d '${jsonData}'`;
+  -d '${escapedJsonData}'`;
         
         console.log('Setting curl command text');
         curlCommand.textContent = curlCmd;

@@ -1,0 +1,12 @@
+{
+  "messages": [
+    {
+      "type": "text",
+      "text": "Hi John! 👋 I noticed you've been researching the BMW X5. Don't miss out on today's special offer!"
+    },
+    {
+      "type": "text",
+      "text": "It's the perfect time to upgrade. Here's what makes it special:"
+    }
+  ]
+}

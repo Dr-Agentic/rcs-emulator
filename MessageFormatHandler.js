@@ -29,9 +29,10 @@ const parseMessage = (jsonData) => {
 };
 
 const convertToUIMessage = (parsedMessage, sender = 'business') => {
+    const baseTimestamp = new Date();
     const baseMessage = {
         id: Date.now() + Math.random(),
-        timestamp: new Date(),
+        timestamp: baseTimestamp,
         type: sender === 'user' ? 'sent' : 'received'
     };
 
@@ -66,7 +67,8 @@ const _detectCurrentFormat = (jsonData) => {
     return jsonData.type || 
            jsonData.richCard || 
            jsonData.carousel || 
-           jsonData.text;
+           jsonData.text ||
+           jsonData.media;
 };
 
 const _parseGoogleRCSMessage = (googleData) => {
@@ -78,16 +80,20 @@ const _parseGoogleRCSMessage = (googleData) => {
         throw new Error('Invalid Google RCS format: empty messages array');
     }
     
-    const message = googleData.messages[0];
+    // Process all messages in the array
+    const parsedMessages = googleData.messages.map(message => {
+        if (message.richCard) {
+            return _parseGoogleRichCard(message.richCard);
+        }
+        if (message.text) {
+            return { text: _parseTextMessage(message) };
+        }
+        
+        throw new Error('Unsupported Google RCS message type');
+    });
     
-    if (message.richCard) {
-        return _parseGoogleRichCard(message.richCard);
-    }
-    if (message.text) {
-        return { text: _parseTextMessage(message) };
-    }
-    
-    throw new Error('Unsupported Google RCS message type');
+    // Return as a messages array for proper handling
+    return { messages: parsedMessages };
 };
 
 const _parseGoogleRichCard = (richCard) => {
@@ -152,6 +158,9 @@ const _mapGoogleActionType = (action) => {
 };
 
 const _parseCurrentFormat = (jsonData) => {
+    if (jsonData.type === 'media' || jsonData.media) {
+        return { media: _parseMediaMessage(jsonData) };
+    }
     if (jsonData.type === 'carousel' || jsonData.carousel) {
         return { carousel: _parseCarousel(jsonData.carousel || jsonData) };
     }
@@ -204,6 +213,51 @@ const _parseTextMessage = (textData) => {
     };
 };
 
+const _parseMediaMessage = (mediaData) => {
+    if (!mediaData || typeof mediaData !== 'object') {
+        throw new Error('Invalid media message data structure');
+    }
+    
+    // RCS standard format: { type: "media", mediaType: "image", url: "...", text: "..." }
+    return {
+        text: mediaData.text || '',
+        type: 'media',
+        mediaType: mediaData.mediaType || 'image',  // image, video, document
+        url: _processMediaUrl(mediaData.url || ''),
+        name: mediaData.name || '',
+        size: mediaData.size || 0,
+        suggestedActions: _parseSuggestedActions(mediaData.suggestedActions || mediaData.suggestions || [])
+    };
+};
+
+const _processMediaUrl = (url) => {
+    if (!url) return '';
+    
+    // Convert YouTube URLs to embeddable format
+    if (url.includes('youtube.com/watch?v=') || url.includes('youtu.be/')) {
+        const videoId = _extractYouTubeVideoId(url);
+        if (videoId) {
+            return `https://www.youtube.com/embed/${videoId}`;
+        }
+    }
+    
+    return url;
+};
+
+const _extractYouTubeVideoId = (url) => {
+    const patterns = [
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/,
+        /youtube\.com\/embed\/([^&\n?#]+)/
+    ];
+    
+    for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match) return match[1];
+    }
+    
+    return null;
+};
+
 const _parseActions = (actions) => {
     if (!Array.isArray(actions)) return [];
     
@@ -224,6 +278,18 @@ const _parseSuggestedActions = (suggestions) => {
 };
 
 const _mapParsedToUI = (parsedMessage, baseMessage) => {
+    if (parsedMessage.messages) {
+        // Handle Google RCS messages array - return array of UI messages
+        const baseTime = baseMessage.timestamp.getTime();
+        return parsedMessage.messages.map((msg, index) => {
+            const msgBaseMessage = {
+                ...baseMessage,
+                id: baseMessage.id + index,  // Unique ID for each message
+                timestamp: new Date(baseTime + index * 100)  // Proper Date objects with staggered timing
+            };
+            return _mapParsedToUI(msg, msgBaseMessage);
+        });
+    }
     if (parsedMessage.carousel) {
         return { ...baseMessage, carousel: parsedMessage.carousel };
     }
@@ -235,6 +301,19 @@ const _mapParsedToUI = (parsedMessage, baseMessage) => {
             ...baseMessage, 
             text: parsedMessage.text.text,
             suggestedActions: parsedMessage.text.suggestedActions
+        };
+    }
+    if (parsedMessage.media) {
+        return {
+            ...baseMessage,
+            text: parsedMessage.media.text,
+            media: {
+                type: parsedMessage.media.mediaType,  // Use mediaType as type for renderMedia
+                url: parsedMessage.media.url,
+                name: parsedMessage.media.name,
+                size: parsedMessage.media.size
+            },
+            suggestedActions: parsedMessage.media.suggestedActions
         };
     }
     

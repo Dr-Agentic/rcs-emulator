@@ -97,15 +97,35 @@ class RCSEmulator {
         const text = this.messageInput.value.trim();
         if (!text) return;
 
-        const message = {
-            id: Date.now(),
-            text: text,
-            type: 'sent',
-            timestamp: new Date(),
-            status: 'sending'
+        // Create Google RCS format message (consistent with API)
+        const rcsMessage = {
+            messages: [
+                {
+                    type: 'text',
+                    text: text
+                }
+            ],
+            sender: 'user'
         };
 
-        this.addMessage(message);
+        // Process through the same pipeline as API messages
+        const uiMessage = this.convertApiToUIMessage(rcsMessage);
+        
+        // Handle both single and array messages consistently
+        if (Array.isArray(uiMessage)) {
+            uiMessage.forEach((msg, index) => {
+                msg.type = 'sent'; // Override to sent for user messages
+                msg.status = 'sending';
+                setTimeout(() => {
+                    this.addMessage(msg);
+                }, index * 50);
+            });
+        } else {
+            uiMessage.type = 'sent';
+            uiMessage.status = 'sending';
+            this.addMessage(uiMessage);
+        }
+
         this.messageInput.value = '';
         this.autoResizeTextarea();
         this.handleInputChange();
@@ -117,7 +137,7 @@ class RCSEmulator {
             messageType: 'text',
             text: text,
             userId: this.getUserId(),
-            messageId: message.id
+            messageId: uiMessage.id || (Array.isArray(uiMessage) ? uiMessage[0].id : Date.now())
         });
 
         // Simulate message status updates
@@ -132,15 +152,40 @@ class RCSEmulator {
         this.scrollToBottom();
     }
 
+    formatMessageTime(timestamp) {
+        // Handle both Date objects and ISO strings properly
+        if (!timestamp) {
+            return new Date().toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit'
+            });
+        }
+        
+        let date;
+        if (timestamp instanceof Date) {
+            date = timestamp;
+        } else if (typeof timestamp === 'string') {
+            date = new Date(timestamp);
+            // Check if the date is valid
+            if (isNaN(date.getTime())) {
+                date = new Date(); // Fallback to current time
+            }
+        } else {
+            date = new Date(); // Fallback to current time
+        }
+        
+        return date.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit'
+        });
+    }
+
     renderMessage(message) {
         const messageElement = document.createElement('div');
         messageElement.className = `message ${message.type}`;
         messageElement.dataset.messageId = message.id;
 
-        const timeString = message.timestamp.toLocaleTimeString('en-US', {
-            hour: 'numeric',
-            minute: '2-digit'
-        });
+        const timeString = this.formatMessageTime(message.timestamp);
 
         let statusHTML = '';
         if (message.type === 'sent') {
@@ -203,7 +248,21 @@ class RCSEmulator {
             case 'image':
                 return `<div class="message-media"><img src="${media.url}" alt="Image" onclick="this.requestFullscreen()"></div>`;
             case 'video':
-                return `<div class="message-media"><video src="${media.url}" controls></video></div>`;
+                // Check if it's a YouTube embed URL
+                if (media.url.includes('youtube.com/embed/')) {
+                    return `<div class="message-media">
+                        <iframe 
+                            src="${media.url}" 
+                            width="300" 
+                            height="200" 
+                            frameborder="0" 
+                            allowfullscreen
+                            style="border-radius: 8px;">
+                        </iframe>
+                    </div>`;
+                } else {
+                    return `<div class="message-media"><video src="${media.url}" controls style="max-width: 300px; border-radius: 8px;"></video></div>`;
+                }
             case 'document':
                 return `
                     <div class="message-document">
@@ -380,26 +439,41 @@ class RCSEmulator {
         const files = Array.from(e.target.files);
         
         files.forEach(file => {
-            const message = {
-                id: Date.now() + Math.random(),
-                text: '',
-                type: 'sent',
-                timestamp: new Date(),
-                status: 'sending',
-                media: {
-                    type: this.getMediaType(file.type),
-                    url: URL.createObjectURL(file),
-                    name: file.name,
-                    size: file.size
-                }
+            // Create Google RCS format media message
+            const rcsMessage = {
+                messages: [
+                    {
+                        type: 'media',
+                        media: {
+                            mediaType: this.getMediaType(file.type),
+                            url: URL.createObjectURL(file),
+                            name: file.name,
+                            size: file.size
+                        }
+                    }
+                ],
+                sender: 'user'
             };
 
-            this.addMessage(message);
+            // Process through consistent pipeline
+            const uiMessage = this.convertApiToUIMessage(rcsMessage);
+            if (Array.isArray(uiMessage)) {
+                uiMessage.forEach(msg => {
+                    msg.type = 'sent';
+                    msg.status = 'sending';
+                    this.addMessage(msg);
+                });
+            } else {
+                uiMessage.type = 'sent';
+                uiMessage.status = 'sending';
+                this.addMessage(uiMessage);
+            }
             
             // Simulate upload progress
-            setTimeout(() => this.updateMessageStatus(message.id, 'sent'), 1000);
-            setTimeout(() => this.updateMessageStatus(message.id, 'delivered'), 2000);
-            setTimeout(() => this.updateMessageStatus(message.id, 'read'), 3000);
+            const messageId = Array.isArray(uiMessage) ? uiMessage[0].id : uiMessage.id;
+            setTimeout(() => this.updateMessageStatus(messageId, 'sent'), 1000);
+            setTimeout(() => this.updateMessageStatus(messageId, 'delivered'), 2000);
+            setTimeout(() => this.updateMessageStatus(messageId, 'read'), 3000);
         });
 
         // Clear file input
@@ -435,49 +509,98 @@ class RCSEmulator {
     }
 
     simulateCameraCapture() {
-        // Simulate camera capture with a placeholder image
-        const message = {
-            id: Date.now(),
-            text: '',
-            type: 'sent',
-            timestamp: new Date(),
-            status: 'sending',
-            media: {
-                type: 'image',
-                url: 'https://via.placeholder.com/300x200/007AFF/FFFFFF?text=📷+Photo',
-                name: 'IMG_' + Date.now() + '.jpg',
-                size: 1024000
-            }
+        // Create Google RCS format image message
+        const rcsMessage = {
+            messages: [
+                {
+                    type: 'media',
+                    media: {
+                        mediaType: 'image',
+                        url: 'https://via.placeholder.com/300x200/007AFF/FFFFFF?text=📷+Photo',
+                        name: 'IMG_' + Date.now() + '.jpg',
+                        size: 1024000
+                    }
+                }
+            ],
+            sender: 'user'
         };
 
-        this.addMessage(message);
-        setTimeout(() => this.updateMessageStatus(message.id, 'sent'), 500);
-        setTimeout(() => this.updateMessageStatus(message.id, 'delivered'), 1000);
-        setTimeout(() => this.updateMessageStatus(message.id, 'read'), 2000);
+        // Process through consistent pipeline
+        const uiMessage = this.convertApiToUIMessage(rcsMessage);
+        if (Array.isArray(uiMessage)) {
+            uiMessage.forEach(msg => {
+                msg.type = 'sent';
+                msg.status = 'sending';
+                this.addMessage(msg);
+            });
+        } else {
+            uiMessage.type = 'sent';
+            uiMessage.status = 'sending';
+            this.addMessage(uiMessage);
+        }
+
+        const messageId = Array.isArray(uiMessage) ? uiMessage[0].id : uiMessage.id;
+        setTimeout(() => this.updateMessageStatus(messageId, 'sent'), 500);
+        setTimeout(() => this.updateMessageStatus(messageId, 'delivered'), 1000);
+        setTimeout(() => this.updateMessageStatus(messageId, 'read'), 2000);
     }
 
     shareLocation() {
-        const message = {
-            id: Date.now(),
-            text: '',
-            type: 'sent',
-            timestamp: new Date(),
-            status: 'sending',
-            richCard: {
-                title: 'Current Location',
-                description: 'San Francisco, CA, USA',
-                image: 'https://via.placeholder.com/300x160/007AFF/FFFFFF?text=📍+Map',
-                actions: [
-                    { label: 'Open in Maps', action: 'open_maps', type: 'primary' },
-                    { label: 'Share', action: 'share_location', type: 'secondary' }
-                ]
-            }
+        // Create Google RCS format rich card for location
+        const rcsMessage = {
+            messages: [
+                {
+                    type: 'richCard',
+                    richCard: {
+                        standaloneCard: {
+                            cardContent: {
+                                title: 'Current Location',
+                                description: 'San Francisco, CA, USA',
+                                media: {
+                                    height: 'MEDIUM',
+                                    contentInfo: {
+                                        fileUrl: 'https://via.placeholder.com/300x160/007AFF/FFFFFF?text=📍+Map',
+                                        altText: 'Location Map'
+                                    }
+                                },
+                                suggestions: [
+                                    {
+                                        action: {
+                                            urlAction: {
+                                                openUrl: {
+                                                    url: 'https://maps.apple.com/?ll=37.7749,-122.4194'
+                                                }
+                                            }
+                                        },
+                                        text: 'Open in Maps'
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            ],
+            sender: 'user'
         };
 
-        this.addMessage(message);
-        setTimeout(() => this.updateMessageStatus(message.id, 'sent'), 500);
-        setTimeout(() => this.updateMessageStatus(message.id, 'delivered'), 1000);
-        setTimeout(() => this.updateMessageStatus(message.id, 'read'), 2000);
+        // Process through consistent pipeline
+        const uiMessage = this.convertApiToUIMessage(rcsMessage);
+        if (Array.isArray(uiMessage)) {
+            uiMessage.forEach(msg => {
+                msg.type = 'sent';
+                msg.status = 'sending';
+                this.addMessage(msg);
+            });
+        } else {
+            uiMessage.type = 'sent';
+            uiMessage.status = 'sending';
+            this.addMessage(uiMessage);
+        }
+
+        const messageId = Array.isArray(uiMessage) ? uiMessage[0].id : uiMessage.id;
+        setTimeout(() => this.updateMessageStatus(messageId, 'sent'), 500);
+        setTimeout(() => this.updateMessageStatus(messageId, 'delivered'), 1000);
+        setTimeout(() => this.updateMessageStatus(messageId, 'read'), 2000);
     }
 
     shareContact() {
@@ -541,7 +664,7 @@ class RCSEmulator {
         this.eventSource.onmessage = (event) => {
             const data = JSON.parse(event.data);
             if (data.type === 'newMessage') {
-                this.renderApiMessage(data.message);
+                this.renderApiMessage(data.message); // data.message is now the server envelope
             }
         };
 
@@ -552,16 +675,30 @@ class RCSEmulator {
         console.log('Connected to SSE stream for real-time messages');
     }
 
-    renderApiMessage(apiMessage) {
-        const uiMessage = this.convertApiToUIMessage(apiMessage);
-        this.addMessage(uiMessage);
+    renderApiMessage(serverEnvelope) {
+        // Extract pure RCS content from server envelope
+        console.log("renderApiMessage --> Server Envelope: ", serverEnvelope);
+
+        const rcsMessage = serverEnvelope.content || serverEnvelope;
+        const uiMessage = this.convertApiToUIMessage(rcsMessage);
+        
+        // Handle message arrays (Google RCS format)
+        if (Array.isArray(uiMessage)) {
+            uiMessage.forEach((msg, index) => {
+                setTimeout(() => {
+                    this.addMessage(msg);
+                }, index * 200);
+            });
+        } else {
+            this.addMessage(uiMessage);
+        }
     }
 
-    convertApiToUIMessage(apiMsg) {
+    convertApiToUIMessage(rcsMessage) {
         try {
-            // Use universal message format handler
-            const parsedMessage = MessageFormatHandler.parseMessage(apiMsg);
-            const sender = apiMsg.sender || 'business';
+            // Use universal message format handler with pure RCS content
+            const parsedMessage = MessageFormatHandler.parseMessage(rcsMessage);
+            const sender = rcsMessage.sender || 'business';
             return MessageFormatHandler.convertToUIMessage(parsedMessage, sender);
         } catch (error) {
             console.error('Message parsing error:', error);
@@ -786,13 +923,19 @@ class DeveloperPanel {
 
         try {
             const messageData = JSON.parse(this.jsonInput.value.trim());
-            const message = this.convertJSONToMessage(messageData);
+            
+            // Create server envelope structure (same as API)
+            const serverEnvelope = {
+                id: Date.now(),
+                timestamp: new Date().toISOString(),
+                status: 'sent',
+                content: messageData  // Pure RCS message
+            };
             
             if (window.rcsEmulator) {
-                window.rcsEmulator.addMessage(message);
+                // Use existing pipeline that handles arrays correctly
+                window.rcsEmulator.renderApiMessage(serverEnvelope);
                 this.showStatus('✅ Message sent to phone successfully!', 'success');
-                
-                // Keep JSON in panel for easy iteration and debugging
             } else {
                 this.showStatus('Error: RCS Emulator not found.', 'error');
             }
@@ -802,25 +945,7 @@ class DeveloperPanel {
         }
     }
 
-    convertJSONToMessage(jsonData) {
-        // Use the same converter as RCSEmulator but override the type based on sender
-        const apiMessage = {
-            ...jsonData,
-            id: Date.now(),
-            timestamp: new Date().toISOString()
-        };
-        
-        const uiMessage = window.rcsEmulator.convertApiToUIMessage(apiMessage);
-        
-        // Override type based on sender field
-        if (jsonData.sender === 'user') {
-            uiMessage.type = 'sent';
-        } else {
-            uiMessage.type = 'received';
-        }
-        
-        return uiMessage;
-    }
+    // Method removed - now using renderApiMessage pipeline for consistency
 
     loadExample(exampleType) {
         if (this.examples[exampleType]) {

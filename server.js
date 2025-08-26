@@ -89,30 +89,31 @@ class RCSServer {
                 return this.sendJsonResponse(res, 400, { error: validationError });
             }
 
-            // Process message
+            // Process message with proper separation
             const messageId = Date.now().toString();
-            const processedMessage = {
+            const serverEnvelope = {
                 id: messageId,
-                ...messageData,
                 timestamp: new Date().toISOString(),
-                status: 'sent'
+                status: 'sent',
+                content: messageData  // Keep RCS message pure
             };
 
-            // Store message in queue (in production, this would be a database)
-            this.messageQueue.push(processedMessage);
+            // Store envelope in queue
+            this.messageQueue.push(serverEnvelope);
 
             // Send success response
             this.sendJsonResponse(res, 200, {
                 success: true,
                 messageId: messageId,
-                timestamp: processedMessage.timestamp,
+                timestamp: serverEnvelope.timestamp,
                 message: 'RCS message sent successfully'
             });
 
             console.log(`RCS message sent: ${messageId}`, messageData);
+            console.log('Server envelope:', serverEnvelope);
 
             // Broadcast to all connected SSE clients
-            this.broadcastToClients(processedMessage);
+            this.broadcastToClients(serverEnvelope);
 
         } catch (error) {
             console.error('Error sending message:', error);
