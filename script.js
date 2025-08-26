@@ -97,6 +97,12 @@ class RCSEmulator {
         const text = this.messageInput.value.trim();
         if (!text) return;
 
+        // 📡 CAPTURE USER MESSAGE EVENT for RCS business server
+        if (window.rcsEventCapture) {
+            console.log('📡 Capturing user message event:', text);
+            window.rcsEventCapture.captureUserMessage(text);
+        }
+
         // Create Google RCS format message (consistent with API)
         const rcsMessage = {
             messages: [
@@ -936,6 +942,24 @@ class DeveloperPanel {
                 // Use existing pipeline that handles arrays correctly
                 window.rcsEmulator.renderApiMessage(serverEnvelope);
                 this.showStatus('✅ Message sent to phone successfully!', 'success');
+                
+                // Generate delivery/read events for business→user messages
+                const businessMessageId = 'msg_business_' + Date.now();
+                
+                // Simulate message delivery (business message reached user device)
+                setTimeout(() => {
+                    if (window.rcsEventCapture) {
+                        window.rcsEventCapture.captureMessageStatus(businessMessageId, 'delivered');
+                    }
+                }, 800);
+                
+                // Simulate message read (user opened business message)
+                setTimeout(() => {
+                    if (window.rcsEventCapture) {
+                        window.rcsEventCapture.captureMessageStatus(businessMessageId, 'read');
+                    }
+                }, 2000);
+                
             } else {
                 this.showStatus('Error: RCS Emulator not found.', 'error');
             }

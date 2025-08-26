@@ -356,6 +356,34 @@ or
                     <h2>RCS Server Configuration</h2>
                     <p>Configure your server endpoint to receive user interactions</p>
                 </div>
+
+                <!-- Live Event Viewer -->
+                <div class="event-viewer-section">
+                    <h3>📡 Live User Interactions</h3>
+                    <p class="section-description">Real-time GSMA UP compliant events from iPhone emulator</p>
+                    
+                    <div class="event-display">
+                        <div class="event-header">
+                            <span id="eventStatus" class="event-status">📡 Waiting for user interaction...</span>
+                        </div>
+                        
+                        <div class="json-viewer">
+                            <pre id="eventJsonViewer" class="json-code">{
+  "eventType": "waiting",
+  "message": "Interact with the iPhone emulator to see events here"
+}</pre>
+                        </div>
+                        
+                        <div class="event-controls">
+                            <button onclick="rcsEventCapture.copyJSON()" class="copy-btn">📋 Copy JSON</button>
+                            <button onclick="rcsEventCapture.manualSend()" class="send-btn">📤 Send to Server</button>
+                        </div>
+                        
+                        <div id="webhookStatus" class="webhook-status info">
+                            Configure webhook URL below to receive events
+                        </div>
+                    </div>
+                </div>
                     
                     <div class="form-group">
                         <label for="rcsServerUrl">RCS Server Endpoint URL</label>
@@ -391,39 +419,6 @@ or
                     </div>
 
                     <div id="serverStatus" class="server-status" style="display: none;"></div>
-
-                    <div class="webhook-info">
-                        <h4>Webhook Payload Examples</h4>
-                        <div class="payload-examples">
-                            <div class="payload-example">
-                                <h5>Text Message</h5>
-                                <pre class="payload-code">{
-  "type": "message",
-  "messageType": "text",
-  "text": "Hello from user",
-  "userId": "user_12345",
-  "timestamp": "2024-08-24T03:30:00Z",
-  "sessionId": "session_abc123"
-}</pre>
-                            </div>
-                            <div class="payload-example">
-                                <h5>Button Click</h5>
-                                <pre class="payload-code">{
-  "type": "action",
-  "actionType": "button_click",
-  "action": "buy_now",
-  "label": "Buy Now",
-  "userId": "user_12345",
-  "timestamp": "2024-08-24T03:30:00Z",
-  "sessionId": "session_abc123",
-  "context": {
-    "messageId": "msg_789",
-    "cardTitle": "iPhone 15 Pro"
-  }
-}</pre>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -584,6 +579,8 @@ console.log(result);</code>
 
     <script src="auth.js"></script>
     <script src="MessageFormatHandler.js"></script>
+    <script src="rcs-events.js"></script>
+    <script src="rcs-event-handlers.js"></script>
     <script src="script.js"></script>
     <script src="dashboard.js"></script>
 </body>

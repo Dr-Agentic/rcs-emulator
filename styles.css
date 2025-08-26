@@ -2289,3 +2289,138 @@ body {
     padding: 6px 8px; /* Reduced padding */
     margin-bottom: 8px; /* Reduced spacing */
 }
+/* ===== EVENT VIEWER STYLES ===== */
+.event-viewer-section {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.event-viewer-section h3 {
+    margin: 0 0 8px 0;
+    color: #1f2937;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.event-display {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 16px;
+}
+
+.event-header {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.event-status {
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.event-status.success {
+    color: #059669;
+}
+
+.event-status.error {
+    color: #dc2626;
+}
+
+.json-viewer {
+    background: #1f2937;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 12px 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.json-code {
+    color: #f9fafb;
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.event-controls {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.event-controls .copy-btn,
+.event-controls .send-btn {
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.event-controls .copy-btn {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.event-controls .copy-btn:hover {
+    background: #e5e7eb;
+}
+
+.event-controls .send-btn {
+    background: #3b82f6;
+    color: white;
+}
+
+.event-controls .send-btn:hover {
+    background: #2563eb;
+}
+
+.webhook-status {
+    font-size: 12px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-top: 8px;
+}
+
+.webhook-status.success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.webhook-status.error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+.webhook-status.info {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #93c5fd;
+}
+
+/* Responsive adjustments for event viewer */
+@media (max-width: 768px) {
+    .event-controls {
+        flex-direction: column;
+    }
+    
+    .json-viewer {
+        max-height: 200px;
+    }
+    
+    .json-code {
+        font-size: 11px;
+    }
+}
