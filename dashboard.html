@@ -111,28 +111,32 @@
     <main class="dashboard-main">
         <!-- Emulator Section -->
         <div id="emulator" class="content-section active">
-            <div class="main-container">
-                <!-- Developer Panel -->
-                <div class="developer-panel">
-                    <div class="panel-header">
-                        <h2>RCS Developer Panel</h2>
-                        <p>Paste JSON RCS messages to test on the emulator</p>
+            <!-- Left Panel -->
+            <div class="panel-left">
+                <div class="panel-header">
+                    <h2>RCS Developer Panel</h2>
+                    <p>Paste JSON RCS messages to test on the emulator</p>
+                </div>
+                
+                <div class="api-key-section collapsible">
+                    <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                        <label>Your API Key</label>
+                        <span class="collapse-icon">▶</span>
                     </div>
-                    
-                    <div class="api-key-section">
-                        <label>Your API Key:</label>
+                    <div class="collapsible-content" style="display: none;">
                         <div class="api-key-display">
                             <code id="apiKeyDisplay">Loading...</code>
                             <button id="copyApiKey" class="copy-btn">Copy</button>
                         </div>
                         <p class="api-key-note">Use this API key to send messages programmatically</p>
                     </div>
-                    
-                    <div class="json-input-section">
-                        <label for="jsonInput">RCS Message JSON:</label>
-                        <textarea 
-                            id="jsonInput" 
-                            placeholder='Paste your RCS JSON message here, e.g.:
+                </div>
+                
+                <div class="json-input-section">
+                    <label for="jsonInput">RCS Message JSON:</label>
+                    <textarea 
+                        id="jsonInput" 
+                        placeholder='Paste your RCS JSON message here, e.g.:
 {
   "type": "text",
   "text": "Hello from RCS!",
@@ -151,22 +155,24 @@ or
     {"label": "Learn More", "action": "learn_more", "type": "secondary"}
   ]
 }'
-                            rows="15"
-                        ></textarea>
-                        <div class="json-controls">
-                            <button id="sendJsonBtn" class="send-btn-panel">Send to Phone</button>
-                        </div>
-                        <div id="jsonStatus" class="json-status"></div>
+                        rows="5"
+                    ></textarea>
+                    <div class="json-controls">
+                        <button id="sendJsonBtn" class="send-btn-panel">Send to Phone</button>
                     </div>
+                    <div id="jsonStatus" class="json-status"></div>
+                </div>
 
-                    <!-- cURL Command Section -->
-                    <div class="curl-command-section">
-                        <div class="curl-header">
-                            <h3>cURL Command</h3>
-                            <div class="curl-buttons">
-                                <button id="refreshCurlBtn" class="copy-btn" style="margin-right: 8px;">Refresh</button>
-                                <button id="copyCurlBtn" class="copy-btn">Copy Command</button>
-                            </div>
+                <!-- cURL Command Section -->
+                <div class="curl-command-section collapsible">
+                    <div class="collapsible-header" onclick="toggleCollapsible(this)">
+                        <h3>cURL Command</h3>
+                        <span class="collapse-icon">▶</span>
+                    </div>
+                    <div class="collapsible-content" style="display: none;">
+                        <div class="curl-buttons">
+                            <button id="refreshCurlBtn" class="copy-btn" style="margin-right: 8px;">Refresh</button>
+                            <button id="copyCurlBtn" class="copy-btn">Copy Command</button>
                         </div>
                         <p class="curl-description">Ready-to-use cURL command with your API key (uses your exact JSON input):</p>
                         <div class="curl-display">
@@ -181,118 +187,46 @@ or
                         </div>
                         <p class="curl-note" id="curlNote">💡 The command updates automatically when you modify the JSON above</p>
                     </div>
+                </div>
 
-                    <div class="examples-section">
-                        <h3>Example RCS Messages</h3>
-                        <p class="section-description">Try different RCS message types supported by our emulator</p>
+                <div class="examples-section">
+                    <h3>Example RCS Messages</h3>
+                    <p class="section-description">Try different RCS message types supported by our emulator</p>
+                    
+                    <div class="example-grid">
+                        <div class="example-category">
+                            <h4>📝 Text Messages</h4>
+                            <button class="example-btn" data-example="text">Simple Text</button>
+                            <button class="example-btn" data-example="suggestedActions">Text + Quick Actions</button>
+                        </div>
                         
-                        <div class="example-grid">
-                            <div class="example-category">
-                                <h4>📝 Text Messages</h4>
-                                <button class="example-btn" data-example="text">Simple Text</button>
-                                <button class="example-btn" data-example="suggestedActions">Text + Quick Actions</button>
-                            </div>
-                            
-                            <div class="example-category">
-                                <h4>💎 Rich Cards</h4>
-                                <button class="example-btn" data-example="richCard">iPhone 15 Pro Card</button>
-                                <button class="example-btn" data-example="coffeeCard">Coffee Shop Card</button>
-                            </div>
-                            
-                            <div class="example-category">
-                                <h4>🎠 Carousels</h4>
-                                <button class="example-btn" data-example="carousel">Product Carousel</button>
-                            </div>
-                            
-                            <div class="example-category">
-                                <h4>📱 Media Messages</h4>
-                                <button class="example-btn" data-example="media">Photo Message</button>
-                                <button class="example-btn" data-example="video">Video Message</button>
-                            </div>
+                        <div class="example-category">
+                            <h4>💎 Rich Cards</h4>
+                            <button class="example-btn" data-example="richCard">iPhone 15 Pro Card</button>
+                            <button class="example-btn" data-example="coffeeCard">Coffee Shop Card</button>
+                        </div>
+                        
+                        <div class="example-category">
+                            <h4>🎠 Carousels</h4>
+                            <button class="example-btn" data-example="carousel">Product Carousel</button>
+                        </div>
+                        
+                        <div class="example-category">
+                            <h4>📱 Media Messages</h4>
+                            <button class="example-btn" data-example="media">Photo Message</button>
+                            <button class="example-btn" data-example="video">Video Message</button>
                         </div>
                     </div>
+                </div>
 
-                    <!-- RCS Server Configuration - Collapsible -->
-                    <div class="server-config-section collapsible">
-                        <div class="collapsible-header" id="serverConfigToggle">
-                            <h3>RCS Server Configuration</h3>
-                            <div class="collapse-icon">▼</div>
-                        </div>
-                        <div class="collapsible-content" id="serverConfigContent" style="display: none;">
-                            <p class="section-description">Configure your server endpoint to receive user interactions (messages, button clicks, etc.)</p>
-                            
-                            <div class="form-group">
-                                <label for="rcsServerUrl">RCS Server Endpoint URL</label>
-                                <input 
-                                    type="url" 
-                                    id="rcsServerUrl" 
-                                    placeholder="https://your-server.com/rcs/webhook" 
-                                    class="server-input"
-                                >
-                                <div class="input-help">
-                                    <span class="help-icon">💡</span>
-                                    <span class="help-text">Your server will receive POST requests with user interaction data</span>
-                                </div>
-                            </div>
 
-                            <div class="form-group">
-                                <label for="authToken">Authentication Token (Optional)</label>
-                                <input 
-                                    type="password" 
-                                    id="authToken" 
-                                    placeholder="Bearer token or API key" 
-                                    class="server-input"
-                                >
-                                <div class="input-help">
-                                    <span class="help-icon">🔒</span>
-                                    <span class="help-text">Will be sent as Authorization header</span>
-                                </div>
-                            </div>
 
-                            <div class="server-controls">
-                                <button id="testServerBtn" class="test-btn">Test Connection</button>
-                                <button id="saveServerBtn" class="save-btn">Save Configuration</button>
-                            </div>
-
-                            <div id="serverStatus" class="server-status" style="display: none;"></div>
-
-                            <div class="webhook-info">
-                                <h4>Webhook Payload Examples</h4>
-                                <div class="payload-examples">
-                                    <div class="payload-example">
-                                        <h5>Text Message</h5>
-                                        <pre class="payload-code">{
-  "type": "message",
-  "messageType": "text",
-  "text": "Hello from user",
-  "userId": "user_12345",
-  "timestamp": "2024-08-24T03:30:00Z",
-  "sessionId": "session_abc123"
-}</pre>
-                                    </div>
-                                    <div class="payload-example">
-                                        <h5>Button Click</h5>
-                                        <pre class="payload-code">{
-  "type": "action",
-  "actionType": "button_click",
-  "action": "buy_now",
-  "label": "Buy Now",
-  "userId": "user_12345",
-  "timestamp": "2024-08-24T03:30:00Z",
-  "sessionId": "session_abc123",
-  "context": {
-    "messageId": "msg_789",
-    "cardTitle": "iPhone 15 Pro"
-  }
-}</pre>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="documentation-section">
+                <div class="documentation-section collapsible">
+                    <div class="collapsible-header" onclick="toggleCollapsible(this)">
                         <h3>RCS Message Schema</h3>
+                        <span class="collapse-icon">▶</span>
+                    </div>
+                    <div class="collapsible-content" style="display: none;">
                         <div class="schema-info">
                             <p><strong>Text Message:</strong></p>
                             <code>{"type": "text", "text": "message", "sender": "business|user"}</code>
@@ -305,108 +239,188 @@ or
                         </div>
                     </div>
                 </div>
+            </div>
 
+            <!-- Middle Panel -->
+            <div class="panel-middle">
                 <!-- Phone Emulator -->
                 <div class="device-frame">
-                    <div class="screen">
-                        <!-- Status Bar -->
-                        <div class="status-bar">
-                            <div class="status-left">
-                                <span class="time">9:41</span>
+                <div class="screen">
+                    <!-- Status Bar -->
+                    <div class="status-bar">
+                        <div class="status-left">
+                            <span class="time">9:41</span>
+                        </div>
+                        <div class="status-right">
+                            <div class="signal-bars">
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                                <div class="bar"></div>
+                                <div class="bar"></div>
                             </div>
-                            <div class="status-right">
-                                <div class="signal-bars">
-                                    <div class="bar"></div>
-                                    <div class="bar"></div>
-                                    <div class="bar"></div>
-                                    <div class="bar"></div>
-                                </div>
-                                <div class="wifi-icon">📶</div>
-                                <div class="battery">
-                                    <div class="battery-level"></div>
-                                </div>
+                            <div class="wifi-icon">📶</div>
+                            <div class="battery">
+                                <div class="battery-level"></div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Navigation Header -->
-                        <div class="nav-header">
-                            <button class="back-btn">‹</button>
-                            <div class="contact-info">
-                                <div class="contact-avatar">
-                                    <img src="https://lh6.googleusercontent.com/x5FNSiOC9ffXqaTaUoNdXE7YpB9ZYdyb5e_YaIXxrSQinJPbTjlc1H1zGtnY2pFLfqZFitJDWgygXwJWpGHJqySkMJWpBYo0tNM6zKvFb8DlgP9gEJ9CJPwjh-Z6qFSVMQ4K1eCHS_0=w16383" alt="Lexus">
-                                </div>
-                                <div class="contact-details">
-                                    <h3>Sales Team</h3>
-                                    <p class="rcs-indicator">RCS • Online</p>
+                    <!-- Navigation Header -->
+                    <div class="nav-header">
+                        <button class="back-btn">‹</button>
+                        <div class="contact-info">
+                            <div class="contact-avatar">
+                                <img src="https://lh6.googleusercontent.com/x5FNSiOC9ffXqaTaUoNdXE7YpB9ZYdyb5e_YaIXxrSQinJPbTjlc1H1zGtnY2pFLfqZFitJDWgygXwJWpGHJqySkMJWpBYo0tNM6zKvFb8DlgP9gEJ9CJPwjh-Z6qFSVMQ4K1eCHS_0=w16383" alt="Lexus">
+                            </div>
+                            <div class="contact-details">
+                                <h3>Sales Team</h3>
+                                <p class="rcs-indicator">RCS • Online</p>
+                            </div>
+                        </div>
+                        <button class="info-btn">ⓘ</button>
+                    </div>
+
+                    <!-- Messages Container -->
+                    <div class="messages-container" id="messagesContainer">
+                    </div>
+
+                    <!-- Typing Indicator -->
+                    <div class="typing-indicator" id="typingIndicator" style="display: none;">
+                        <div class="typing-dots">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <span class="typing-text">Sales Team is typing...</span>
+                    </div>
+
+                    <!-- Input Area -->
+                    <div class="input-area">
+                        <div class="input-container">
+                            <button class="attachment-btn" id="attachmentBtn">+</button>
+                            <div class="text-input-wrapper">
+                                <textarea 
+                                    id="messageInput" 
+                                    placeholder="RCS Message" 
+                                    rows="1"
+                                    maxlength="8000"
+                                ></textarea>
+                                <div class="input-actions">
+                                    <button class="emoji-btn">😊</button>
                                 </div>
                             </div>
-                            <button class="info-btn">ⓘ</button>
+                            <button class="send-btn" id="sendBtn">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z" fill="currentColor"/>
+                                </svg>
+                            </button>
                         </div>
-
-                        <!-- Messages Container -->
-                        <div class="messages-container" id="messagesContainer">
-                        </div>
-
-                        <!-- Typing Indicator -->
-                        <div class="typing-indicator" id="typingIndicator" style="display: none;">
-                            <div class="typing-dots">
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                            </div>
-                            <span class="typing-text">Sales Team is typing...</span>
-                        </div>
-
-                        <!-- Input Area -->
-                        <div class="input-area">
-                            <div class="input-container">
-                                <button class="attachment-btn" id="attachmentBtn">+</button>
-                                <div class="text-input-wrapper">
-                                    <textarea 
-                                        id="messageInput" 
-                                        placeholder="RCS Message" 
-                                        rows="1"
-                                        maxlength="8000"
-                                    ></textarea>
-                                    <div class="input-actions">
-                                        <button class="emoji-btn">😊</button>
-                                    </div>
-                                </div>
-                                <button class="send-btn" id="sendBtn">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                        <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z" fill="currentColor"/>
-                                    </svg>
+                        
+                        <!-- Attachment Options -->
+                        <div class="attachment-options" id="attachmentOptions" style="display: none;">
+                            <div class="attachment-grid">
+                                <button class="attachment-option" data-type="camera">
+                                    <div class="attachment-icon">📷</div>
+                                    <span>Camera</span>
+                                </button>
+                                <button class="attachment-option" data-type="photo">
+                                    <div class="attachment-icon">🖼️</div>
+                                    <span>Photo</span>
+                                </button>
+                                <button class="attachment-option" data-type="video">
+                                    <div class="attachment-icon">🎥</div>
+                                    <span>Video</span>
+                                </button>
+                                <button class="attachment-option" data-type="document">
+                                    <div class="attachment-icon">📄</div>
+                                    <span>Document</span>
+                                </button>
+                                <button class="attachment-option" data-type="location">
+                                    <div class="attachment-icon">📍</div>
+                                    <span>Location</span>
+                                </button>
+                                <button class="attachment-option" data-type="contact">
+                                    <div class="attachment-icon">👤</div>
+                                    <span>Contact</span>
                                 </button>
                             </div>
-                            
-                            <!-- Attachment Options -->
-                            <div class="attachment-options" id="attachmentOptions" style="display: none;">
-                                <div class="attachment-grid">
-                                    <button class="attachment-option" data-type="camera">
-                                        <div class="attachment-icon">📷</div>
-                                        <span>Camera</span>
-                                    </button>
-                                    <button class="attachment-option" data-type="photo">
-                                        <div class="attachment-icon">🖼️</div>
-                                        <span>Photo</span>
-                                    </button>
-                                    <button class="attachment-option" data-type="video">
-                                        <div class="attachment-icon">🎥</div>
-                                        <span>Video</span>
-                                    </button>
-                                    <button class="attachment-option" data-type="document">
-                                        <div class="attachment-icon">📄</div>
-                                        <span>Document</span>
-                                    </button>
-                                    <button class="attachment-option" data-type="location">
-                                        <div class="attachment-icon">📍</div>
-                                        <span>Location</span>
-                                    </button>
-                                    <button class="attachment-option" data-type="contact">
-                                        <div class="attachment-icon">👤</div>
-                                        <span>Contact</span>
-                                    </button>
-                                </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="panel-right">
+                <div class="panel-header">
+                    <h2>RCS Server Configuration</h2>
+                    <p>Configure your server endpoint to receive user interactions</p>
+                </div>
+                    
+                    <div class="form-group">
+                        <label for="rcsServerUrl">RCS Server Endpoint URL</label>
+                        <input 
+                            type="url" 
+                            id="rcsServerUrl" 
+                            placeholder="https://your-server.com/rcs/webhook" 
+                            class="server-input"
+                        >
+                        <div class="input-help">
+                            <span class="help-icon">💡</span>
+                            <span class="help-text">Your server will receive POST requests with user interaction data</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="authToken">Authentication Token (Optional)</label>
+                        <input 
+                            type="password" 
+                            id="authToken" 
+                            placeholder="Bearer token or API key" 
+                            class="server-input"
+                        >
+                        <div class="input-help">
+                            <span class="help-icon">🔒</span>
+                            <span class="help-text">Will be sent as Authorization header</span>
+                        </div>
+                    </div>
+
+                    <div class="server-controls">
+                        <button id="testServerBtn" class="test-btn">Test Connection</button>
+                        <button id="saveServerBtn" class="save-btn">Save Configuration</button>
+                    </div>
+
+                    <div id="serverStatus" class="server-status" style="display: none;"></div>
+
+                    <div class="webhook-info">
+                        <h4>Webhook Payload Examples</h4>
+                        <div class="payload-examples">
+                            <div class="payload-example">
+                                <h5>Text Message</h5>
+                                <pre class="payload-code">{
+  "type": "message",
+  "messageType": "text",
+  "text": "Hello from user",
+  "userId": "user_12345",
+  "timestamp": "2024-08-24T03:30:00Z",
+  "sessionId": "session_abc123"
+}</pre>
+                            </div>
+                            <div class="payload-example">
+                                <h5>Button Click</h5>
+                                <pre class="payload-code">{
+  "type": "action",
+  "actionType": "button_click",
+  "action": "buy_now",
+  "label": "Buy Now",
+  "userId": "user_12345",
+  "timestamp": "2024-08-24T03:30:00Z",
+  "sessionId": "session_abc123",
+  "context": {
+    "messageId": "msg_789",
+    "cardTitle": "iPhone 15 Pro"
+  }
+}</pre>
                             </div>
                         </div>
                     </div>

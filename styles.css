@@ -47,6 +47,8 @@ body {
     margin-top: 64px;
     min-height: calc(100vh - 64px);
     background: #f7f9fa;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Dashboard Layout */
@@ -64,7 +66,8 @@ body {
 }
 
 .main-container {
-    display: flex;
+    display: flex; /* Re-enable flex display */
+    flex-direction: row; /* Ensure horizontal layout */
     gap: 24px;
     max-width: 1400px;
     margin: 0 auto;
@@ -381,7 +384,7 @@ body {
 
 #jsonInput {
     width: 100%;
-    min-height: 200px;
+    min-height: 140px;
     padding: 16px;
     border: 2px solid #e5e5e7;
     border-radius: 8px;
@@ -858,7 +861,7 @@ body {
 
 #jsonInput {
     width: 100%;
-    min-height: 300px;
+    min-height: 210px;
     padding: 16px;
     border: 1px solid #d1d5db;
     border-radius: 8px;
@@ -1981,7 +1984,7 @@ body {
     }
     
     #jsonInput {
-        min-height: 200px;
+        min-height: 140px;
         font-size: 13px;
     }
     
@@ -2070,4 +2073,219 @@ body {
         line-height: 1.4;
     }
 }
+
+/* Force override content-section padding */
+#emulator.content-section {
+    padding: 24px !important; /* Re-added padding for the section */
+    display: grid !important;
+    grid-template-columns: 1fr 460px 1fr !important;
+    grid-template-areas: "left middle right" !important;
+    gap: 24px !important;
+    width: 100% !important; /* Changed from calc(100vw - 48px) to 100% */
+    max-width: none !important; /* Remove max-width constraint */
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
+    height: 100% !important;
+}
+
+.panel-left { 
+    grid-area: left !important;
+    min-width: 0 !important;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 24px;
+    overflow-y: auto !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.panel-middle { 
+    grid-area: middle !important;
+    width: 460px !important; /* Increased to accommodate device-frame (430px) + some padding */
+    height: fit-content !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.panel-right { 
+    grid-area: right !important;
+    min-width: 0 !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-radius: 16px !important;
+    padding: 24px !important;
+    overflow-y: auto !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+    /* Override any conflicting flex properties */
+    flex: none !important;
+    display: block !important;
+    align-items: unset !important;
+    justify-content: unset !important;
+}
+
+@media (max-width: 768px) {
+    #emulator.content-section {
+        grid-template-columns: 1fr !important;
+        grid-template-areas: "middle" "left" "right" !important;
+        width: calc(100vw - 24px) !important;
+    }
+}
+/* ===== COLLAPSIBLE SECTIONS ===== */
+.collapsible-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 8px 0;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 12px;
+    user-select: none;
+}
+
+.collapsible-header:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+    border-radius: 4px;
+    padding: 8px 8px;
+    margin: 0 -8px 12px -8px;
+}
+
+.collapsible-header label,
+.collapsible-header h3 {
+    margin: 0;
+    font-weight: 600;
+    color: #374151;
+}
+
+.collapse-icon {
+    font-size: 12px;
+    color: #6b7280;
+    transition: transform 0.2s ease;
+}
+
+.collapsible-content {
+    margin-bottom: 24px;
+}
+
+/* Smooth animation for collapsible content */
+.collapsible-content {
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+/* ===== COMPACT LEFT PANEL STYLING ===== */
+.panel-left .developer-panel {
+    padding: 16px; /* Reduced from 24px */
+}
+
+.panel-left .panel-header {
+    margin-bottom: 16px; /* Reduced from 24px */
+    padding-bottom: 12px; /* Reduced from 16px */
+}
+
+.panel-left .panel-header h2 {
+    font-size: 20px; /* Reduced from 24px */
+    margin: 0 0 6px 0; /* Reduced from 8px */
+}
+
+.panel-left .panel-header p {
+    font-size: 13px; /* Reduced from 14px */
+    margin: 0;
+}
+
+/* Compact collapsible sections */
+.panel-left .collapsible-header {
+    padding: 6px 0; /* Reduced from 8px */
+    margin-bottom: 8px; /* Reduced from 12px */
+}
+
+.panel-left .collapsible-content {
+    margin-bottom: 16px; /* Reduced from 24px */
+}
+
+/* Compact JSON input section */
+.panel-left .json-input-section {
+    margin-bottom: 16px; /* Reduced spacing */
+}
+
+.panel-left .json-input-section label {
+    margin-bottom: 6px; /* Reduced from default */
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.panel-left .json-input-section textarea {
+    margin-bottom: 8px; /* Reduced spacing */
+}
+
+.panel-left .json-controls {
+    margin-bottom: 8px; /* Reduced spacing */
+}
+
+/* Compact examples section */
+.panel-left .examples-section {
+    margin-bottom: 16px; /* Reduced spacing */
+}
+
+.panel-left .examples-section h3 {
+    font-size: 18px; /* Slightly smaller */
+    margin-bottom: 12px; /* Reduced from default */
+}
+
+.panel-left .section-description {
+    font-size: 13px; /* Smaller text */
+    margin-bottom: 12px; /* Reduced spacing */
+}
+
+.panel-left .example-grid {
+    gap: 12px; /* Reduced gap between categories */
+}
+
+.panel-left .example-category {
+    margin-bottom: 12px; /* Reduced spacing */
+}
+
+.panel-left .example-category h4 {
+    font-size: 14px; /* Smaller category headers */
+    margin-bottom: 8px; /* Reduced spacing */
+}
+
+.panel-left .example-btn {
+    padding: 8px 12px; /* Reduced from default */
+    font-size: 13px; /* Smaller text */
+    margin: 2px 4px 2px 0; /* Tighter spacing */
+}
+
+/* Compact API key section */
+.panel-left .api-key-display {
+    margin-bottom: 8px; /* Reduced spacing */
+}
+
+.panel-left .api-key-note {
+    font-size: 12px; /* Smaller note text */
+    margin: 0;
+}
+
+/* Compact cURL section */
+.panel-left .curl-buttons {
+    margin-bottom: 8px; /* Reduced spacing */
+}
+
+.panel-left .curl-description {
+    font-size: 13px; /* Smaller text */
+    margin-bottom: 8px; /* Reduced spacing */
+}
+
+.panel-left .curl-note {
+    font-size: 12px; /* Smaller note text */
+    margin-top: 8px; /* Reduced spacing */
+}
+
+/* Compact schema section */
+.panel-left .schema-info p {
+    font-size: 13px; /* Smaller text */
+    margin-bottom: 4px; /* Reduced spacing */
+}
+
+.panel-left .schema-info code {
+    font-size: 11px; /* Smaller code text */
+    padding: 6px 8px; /* Reduced padding */
+    margin-bottom: 8px; /* Reduced spacing */
 }
