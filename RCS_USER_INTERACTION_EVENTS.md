@@ -1,384 +1,173 @@
-# RCS User Interaction Events - GSMA Standard Implementation Guide
+# RCS User Interaction Events - GSMA Universal Profile (UP) Implementation Guide
 
 ## Overview
 
-This document outlines the comprehensive RCS user interaction events based on GSMA RCS specifications, formatted for webhook delivery to business servers. Events are prioritized by business criticality for implementation planning.
+This document specifies **RCS user interaction events** strictly aligned with the **GSMA RCS Universal Profile (UP)**. It defines webhook-style callbacks from the RCS client to the business server, ensuring interoperability across operator networks.
 
-## Implementation Priorities
-
-### 🚨 **Priority A - Mandatory Day 1 Events**
-*Essential interactions that every RCS business implementation requires*
-
-### 🔧 **Priority B - Enhanced Features**
-*Advanced interactions for rich user experience and analytics*
+Where necessary, **vendor or analytic extensions** are noted explicitly as *non-standard*.
 
 ---
 
-## Priority A - Mandatory Day 1 Events
+## Implementation Priorities
 
-### 1. User Message Events
+### 🚨 **Priority A - Mandatory Day 1 Events (GSMA UP Core)**
+*Baseline events required for any RCS B2C deployment (messaging, actions, receipts)*
 
-#### **user.message** - User sends text response
+### 🔧 **Priority B - Enhanced Features (Vendor Extensions)**
+*Optional analytics and engagement features not covered by GSMA UP, useful for advanced tracking and optimization*
+
+**Comment:** Yes, the A/B prioritization is correct. Priority A covers what’s strictly required by GSMA UP. Priority B represents extensions that businesses find valuable, but are *not* defined in UP.
+
+---
+
+## Priority A - Mandatory Day 1 Events (GSMA UP Core)
+
+### 1. User Messages
+
+#### **userMessage (text)**
 ```json
 {
-  "eventType": "user.message",
+  "eventType": "userMessage",
   "messageType": "text",
   "content": {
     "text": "User response text"
   },
+  "eventId": "evt_12345",
   "timestamp": "2024-08-26T03:10:11.896Z",
   "conversationId": "conv_abc123",
-  "userId": "user_12345",
+  "participantId": "+1234567890",
   "messageId": "msg_456"
 }
 ```
+**Notes:**
+- `eventId` required for deduplication (missing in original).
+- `participantId` should follow GSMA format (usually MSISDN or globally unique ID).
 
-#### **user.media** - User sends media content
+#### **userMessage (media)**
 ```json
 {
-  "eventType": "user.message",
+  "eventType": "userMessage",
   "messageType": "media",
   "content": {
-    "mediaType": "image | video | document",
+    "mediaType": "image | video | file",
     "mediaUrl": "https://example.com/media.jpg",
-    "text": "Optional caption text"
+    "caption": "Optional caption"
   },
+  "eventId": "evt_12346",
   "timestamp": "2024-08-26T03:10:11.896Z",
   "conversationId": "conv_abc123",
-  "userId": "user_12345",
+  "participantId": "+1234567890",
   "messageId": "msg_457"
 }
 ```
 
-### 2. Action Click Events
+### 2. Suggested Actions / Quick Replies
 
-#### **action.clicked** - User clicks button/suggested action
+#### **suggestionResponse (click)**
 ```json
 {
-  "eventType": "action.clicked",
-  "actionId": "buy_now",
-  "actionLabel": "Buy Now",
-  "actionType": "primary | secondary | quick_reply",
+  "eventType": "suggestionResponse",
+  "responseType": "reply | action",
+  "postbackData": "buy_now",
+  "displayText": "Buy Now",
   "sourceMessageId": "msg_789",
-  "context": {
-    "cardTitle": "iPhone 15 Pro",
-    "cardDescription": "Latest iPhone model"
-  },
+  "eventId": "evt_12347",
   "timestamp": "2024-08-26T03:10:11.896Z",
   "conversationId": "conv_abc123",
-  "userId": "user_12345"
+  "participantId": "+1234567890"
 }
 ```
+**Notes:**
+- GSMA UP defines **SuggestedReply** and **SuggestedAction**. Original spec used a generic `action.clicked`.
 
-### 3. Message Status Events
+### 3. Message Receipts
 
-#### **message.delivered** - Message delivered to user device
+#### **deliveryReceipt**
 ```json
 {
-  "eventType": "message.delivered",
+  "eventType": "deliveryReceipt",
   "messageId": "msg_789",
-  "deliveredAt": "2024-08-26T03:10:11.896Z",
+  "eventId": "evt_12348",
   "timestamp": "2024-08-26T03:10:11.896Z",
   "conversationId": "conv_abc123",
-  "userId": "user_12345"
+  "participantId": "+1234567890"
 }
 ```
 
-#### **message.read** - User opens/reads message
+#### **readReceipt**
 ```json
 {
-  "eventType": "message.read",
+  "eventType": "readReceipt",
   "messageId": "msg_789",
-  "readAt": "2024-08-26T03:10:11.896Z",
+  "eventId": "evt_12349",
   "timestamp": "2024-08-26T03:10:11.896Z",
   "conversationId": "conv_abc123",
-  "userId": "user_12345"
+  "participantId": "+1234567890"
 }
 ```
+**Notes:**
+- Original used `message.delivered` and `message.read`. Renamed per GSMA UP terminology.
+- Only one timestamp per event is required.
 
-### 4. Rich Card Interactions
+### 4. Chat State (Typing)
 
-#### **card.clicked** - User taps on rich card
+#### **chatState**
 ```json
 {
-  "eventType": "card.clicked",
-  "cardId": "card_456",
-  "interactionType": "tap",
-  "sourceMessageId": "msg_789",
+  "eventType": "chatState",
+  "state": "composing | idle",
+  "eventId": "evt_12350",
   "timestamp": "2024-08-26T03:10:11.896Z",
   "conversationId": "conv_abc123",
-  "userId": "user_12345"
+  "participantId": "+1234567890"
 }
 ```
+**Notes:**
+- Original `user.typing` renamed to GSMA’s `chatState` event.
 
 ---
 
-## Priority B - Enhanced Features
+## Priority B - Enhanced Features (Vendor / Analytic Extensions)
 
-### 1. Typing Indicators
+> The following events are **not part of GSMA UP** but may be valuable for business analytics. Implement as optional vendor-specific extensions.
 
-#### **user.typing** - User typing status
-```json
-{
-  "eventType": "user.typing",
-  "typingStatus": "started | stopped",
-  "timestamp": "2024-08-26T03:10:11.896Z",
-  "conversationId": "conv_abc123",
-  "userId": "user_12345"
-}
-```
+- **card.clicked** (user taps a rich card)  
+- **carousel.swiped** (user swipes a carousel)  
+- **media.started / media.paused / media.progress / media.completed / media.error** (video engagement analytics)  
+- **location.shared** (possible, but GSMA defines a simpler geolocation sharing payload)  
+- **conversation.started / conversation.ended** (session tracking, not standardized in UP)
 
-### 2. Video Interaction Events
-
-#### **media.started** - User starts playing video
-```json
-{
-  "eventType": "media.started",
-  "mediaType": "video",
-  "mediaId": "video_123",
-  "mediaUrl": "https://example.com/video.mp4",
-  "duration": 120.5,
-  "sourceMessageId": "msg_789",
-  "timestamp": "2024-08-26T03:10:11.896Z",
-  "conversationId": "conv_abc123",
-  "userId": "user_12345"
-}
-```
-
-#### **media.paused** - User pauses video
-```json
-{
-  "eventType": "media.paused",
-  "mediaType": "video",
-  "mediaId": "video_123",
-  "currentPosition": 45.2,
-  "duration": 120.5,
-  "sourceMessageId": "msg_789",
-  "timestamp": "2024-08-26T03:10:11.896Z",
-  "conversationId": "conv_abc123",
-  "userId": "user_12345"
-}
-```
-
-#### **media.seeked** - User scrubs/seeks video position
-```json
-{
-  "eventType": "media.seeked",
-  "mediaType": "video",
-  "mediaId": "video_123",
-  "previousPosition": 45.2,
-  "newPosition": 78.9,
-  "duration": 120.5,
-  "sourceMessageId": "msg_789",
-  "timestamp": "2024-08-26T03:10:11.896Z",
-  "conversationId": "conv_abc123",
-  "userId": "user_12345"
-}
-```
-
-#### **media.fullscreen_entered** - User enters fullscreen mode
-```json
-{
-  "eventType": "media.fullscreen_entered",
-  "mediaType": "video",
-  "mediaId": "video_123",
-  "currentPosition": 34.7,
-  "viewportSize": {
-    "width": 1920,
-    "height": 1080
-  },
-  "sourceMessageId": "msg_789",
-  "timestamp": "2024-08-26T03:10:11.896Z",
-  "conversationId": "conv_abc123",
-  "userId": "user_12345"
-}
-```
-
-#### **media.progress** - Periodic playback progress (every 10-30 seconds)
-```json
-{
-  "eventType": "media.progress",
-  "mediaType": "video",
-  "mediaId": "video_123",
-  "currentPosition": 67.3,
-  "duration": 120.5,
-  "percentComplete": 55.8,
-  "playbackRate": 1.0,
-  "isFullscreen": false,
-  "volume": 0.8,
-  "sourceMessageId": "msg_789",
-  "timestamp": "2024-08-26T03:10:11.896Z",
-  "conversationId": "conv_abc123",
-  "userId": "user_12345"
-}
-```
-
-#### **media.completed** - Video playback finished
-```json
-{
-  "eventType": "media.completed",
-  "mediaType": "video",
-  "mediaId": "video_123",
-  "totalWatchTime": 118.2,
-  "duration": 120.5,
-  "percentWatched": 95.4,
-  "completionRate": 98.1,
-  "averagePlaybackRate": 1.1,
-  "fullscreenTime": 45.3,
-  "sourceMessageId": "msg_789",
-  "timestamp": "2024-08-26T03:10:11.896Z",
-  "conversationId": "conv_abc123",
-  "userId": "user_12345"
-}
-```
-
-### 3. Advanced Card Interactions
-
-#### **carousel.swiped** - User swipes carousel
-```json
-{
-  "eventType": "carousel.swiped",
-  "carouselId": "carousel_789",
-  "direction": "left | right",
-  "fromIndex": 0,
-  "toIndex": 1,
-  "sourceMessageId": "msg_789",
-  "timestamp": "2024-08-26T03:10:11.896Z",
-  "conversationId": "conv_abc123",
-  "userId": "user_12345"
-}
-```
-
-### 4. Location Sharing
-
-#### **location.shared** - User shares location
-```json
-{
-  "eventType": "location.shared",
-  "location": {
-    "latitude": 37.7749,
-    "longitude": -122.4194,
-    "accuracy": 10.0,
-    "address": "San Francisco, CA"
-  },
-  "timestamp": "2024-08-26T03:10:11.896Z",
-  "conversationId": "conv_abc123",
-  "userId": "user_12345"
-}
-```
-
-### 5. Conversation Management
-
-#### **conversation.started** - User initiates conversation
-```json
-{
-  "eventType": "conversation.started",
-  "initiatedBy": "user",
-  "timestamp": "2024-08-26T03:10:11.896Z",
-  "conversationId": "conv_abc123",
-  "userId": "user_12345"
-}
-```
-
-#### **conversation.ended** - User ends conversation
-```json
-{
-  "eventType": "conversation.ended",
-  "endedBy": "user",
-  "duration": 1847.3,
-  "messageCount": 23,
-  "timestamp": "2024-08-26T03:10:11.896Z",
-  "conversationId": "conv_abc123",
-  "userId": "user_12345"
-}
-```
-
-### 6. Error Handling
-
-#### **media.error** - Media playback error
-```json
-{
-  "eventType": "media.error",
-  "mediaType": "video",
-  "mediaId": "video_123",
-  "errorCode": "NETWORK_ERROR | DECODE_ERROR | UNSUPPORTED_FORMAT",
-  "errorMessage": "Failed to load video: network timeout",
-  "currentPosition": 23.4,
-  "sourceMessageId": "msg_789",
-  "timestamp": "2024-08-26T03:10:11.896Z",
-  "conversationId": "conv_abc123",
-  "userId": "user_12345"
-}
-```
+**Comment:** These events should be explicitly tagged as *extensions* to avoid confusion with GSMA UP compliance.
 
 ---
 
-## Webhook Delivery Specifications
+## Webhook Delivery Specifications (Aligned with GSMA)
 
-### Technical Requirements
-- **Method**: HTTP POST
-- **Content-Type**: `application/json`
-- **Authorization**: `Bearer {token}` (if configured)
-- **User-Agent**: `RCS-Platform/1.0`
-- **Timeout**: 30 seconds maximum
-- **Retry Policy**: 3 attempts with exponential backoff
-
-### Security Requirements
-- **HTTPS Only**: TLS 1.2+ required
-- **Rate Limiting**: Max 1000 events/minute per conversation
-- **Payload Limit**: 64KB maximum
-- **Webhook Signature**: Optional HMAC verification
-
-### Response Expectations
-- **Success**: HTTP 200-299 status codes
-- **Failure**: HTTP 400+ triggers retry logic
-- **Response Time**: < 5 seconds recommended
-- **Idempotent Processing**: Handle duplicate events gracefully
-
-### Event Ordering & Delivery
-- **Chronological Order**: Events sent in sequence
-- **At-Least-Once Delivery**: Guaranteed delivery with retries
-- **Duplicate Protection**: Use `messageId`/`eventId` for deduplication
-- **Progress Tracking**: Periodic events (10-30 second intervals)
-
----
-
-## Implementation Roadmap
-
-### Phase 1 - Priority A (MVP)
-1. **User Messages** - Text and media responses
-2. **Action Clicks** - Button and quick reply interactions
-3. **Message Status** - Delivery and read receipts
-4. **Basic Card Clicks** - Rich card tap interactions
-
-### Phase 2 - Priority B (Enhanced)
-1. **Typing Indicators** - Real-time typing status
-2. **Video Interactions** - Play, pause, seek, fullscreen
-3. **Advanced Cards** - Carousel swipes, complex interactions
-4. **Location Sharing** - GPS coordinate sharing
-5. **Conversation Management** - Start/end tracking
-6. **Error Handling** - Media and system errors
-
-### Phase 3 - Analytics & Optimization
-1. **Engagement Metrics** - Video completion rates, interaction patterns
-2. **Performance Monitoring** - Error rates, response times
-3. **Advanced Analytics** - User journey tracking, conversion funnels
+- **Method**: HTTP POST, `Content-Type: application/json`  
+- **Transport**: HTTPS (TLS 1.2+)  
+- **Authentication**: OAuth 2.0 bearer tokens recommended (HMAC optional but encouraged).  
+- **Retry Policy**: At-least-once delivery with exponential backoff  
+- **Idempotency**: Must handle duplicates (`eventId` ensures uniqueness).  
 
 ---
 
 ## Common Event Fields
 
-All events include these base fields:
-
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `eventType` | string | ✅ | Type of user interaction |
+| `eventType` | string | ✅ | Type of user interaction (per GSMA UP naming) |
+| `eventId` | string | ✅ | Unique event identifier (required for deduplication) |
 | `timestamp` | string (ISO 8601) | ✅ | When the event occurred |
 | `conversationId` | string | ✅ | Unique conversation identifier |
-| `userId` | string | ✅ | Unique user identifier |
+| `participantId` | string | ✅ | Unique user identifier (MSISDN or GSMA-defined ID) |
 | `messageId` | string | ⚪ | Related message ID (when applicable) |
-| `sourceMessageId` | string | ⚪ | Original business message that triggered interaction |
+| `sourceMessageId` | string | ⚪ | Original business message triggering interaction |
 
 ---
 
-*This document serves as the technical specification for implementing RCS user interaction capture in compliance with GSMA RCS standards.*
+## Conclusion
+
+- **Priority A** (user messages, suggestions, receipts, chat state) = GSMA UP core → required for all B2C deployments.  
+- **Priority B** (rich media engagement, carousel swipes, conversation lifecycle) = extensions → valuable for analytics but non-standard.  
+
+This separation ensures strict GSMA compliance while still enabling advanced business insights through optional vendor-specific events.
