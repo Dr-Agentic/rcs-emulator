@@ -1,0 +1,22 @@
+# Development files
+node_modules/
+.env
+.env.local
+*.log
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test files
+test/
+*.test.js
+
+# Only include essential files for the package
+# server.js and README.md are included via package.json "files" field

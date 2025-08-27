@@ -1,0 +1,23 @@
+{
+  "name": "rcsx-mcp-service",
+  "version": "1.0.0",
+  "description": "HTTP service wrapper for RCSX MCP server - enables remote agent access",
+  "main": "http-server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node http-server.js",
+    "dev": "node --watch http-server.js",
+    "docker:build": "docker build -t rcsx-mcp-service .",
+    "docker:run": "docker run -p 3001:3001 --env-file .env rcsx-mcp-service"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": ["mcp", "rcs", "messaging", "rcsx", "service"],
+  "author": "RCSX Team",
+  "license": "MIT"
+}

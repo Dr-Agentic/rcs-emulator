@@ -1,0 +1,49 @@
+{
+  "name": "rcsx-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for RCSX RCS message emulator - enables AI agents to send RCS messages",
+  "main": "server.js",
+  "type": "module",
+  "bin": {
+    "rcsx-mcp-server": "./server.js"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.4.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "mcp", 
+    "rcs", 
+    "messaging", 
+    "rcsx", 
+    "ai-agent", 
+    "model-context-protocol",
+    "business-messaging",
+    "rich-communication-services"
+  ],
+  "author": "RCSX Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dr-Agentic/rcs-emulator.git",
+    "directory": "mcp/servers/rcsx-mcp-server"
+  },
+  "homepage": "https://github.com/Dr-Agentic/rcs-emulator#readme",
+  "bugs": {
+    "url": "https://github.com/Dr-Agentic/rcs-emulator/issues"
+  },
+  "files": [
+    "server.js",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

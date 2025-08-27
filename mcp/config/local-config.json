@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "rcsx": {
+      "command": "node",
+      "args": ["/Users/Morsy/Documents/dev/rcs/mcp/servers/rcsx-mcp-server/server.js"],
+      "env": {
+        "RCSX_SERVER_URL": "http://localhost:3000",
+        "RCSX_API_KEY": "rcs_qirKDSqNZurdYhDXszdjI8XYxVFXqLLE"
+      }
+    }
+  }
+}

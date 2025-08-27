@@ -1,0 +1,81 @@
+{
+  "examples": {
+    "simple_text": {
+      "rcsMessage": {
+        "messageId": "msg_agent_text_001",
+        "conversationId": "conv_agent_test",
+        "participantId": "+1234567890",
+        "type": "text",
+        "text": "Hello from AI agent! 🤖",
+        "suggestions": [
+          {"action": {"text": "👋 Hi there", "postbackData": "greeting"}},
+          {"action": {"text": "ℹ️ More info", "postbackData": "info"}}
+        ]
+      }
+    },
+    
+    "rich_card": {
+      "rcsMessage": {
+        "messageId": "msg_agent_card_002", 
+        "conversationId": "conv_agent_test",
+        "participantId": "+1234567890",
+        "messages": [
+          {
+            "richCard": {
+              "standaloneCard": {
+                "cardContent": {
+                  "title": "AI Assistant Menu 🤖",
+                  "description": "What can I help you with today?",
+                  "media": {
+                    "height": "MEDIUM",
+                    "contentInfo": {
+                      "fileUrl": "https://via.placeholder.com/300x160/007AFF/FFFFFF?text=🤖+AI",
+                      "mimeType": "image/jpeg"
+                    }
+                  },
+                  "suggestions": [
+                    {"action": {"text": "💬 Ask Question", "postbackData": "ask_question"}},
+                    {"action": {"text": "📋 Get Help", "postbackData": "get_help"}},
+                    {"action": {"text": "⚙️ Settings", "postbackData": "settings"}}
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    
+    "multi_message": {
+      "rcsMessage": {
+        "messageId": "msg_agent_multi_003",
+        "conversationId": "conv_agent_test", 
+        "participantId": "+1234567890",
+        "messages": [
+          {"text": "Welcome! I'm your AI assistant 🤖"},
+          {"text": "I can help you with various tasks:"},
+          {
+            "text": "What would you like to do?",
+            "suggestions": [
+              {"action": {"text": "📝 Create Content", "postbackData": "create_content"}},
+              {"action": {"text": "🔍 Research", "postbackData": "research"}},
+              {"action": {"text": "💡 Brainstorm", "postbackData": "brainstorm"}}
+            ]
+          }
+        ]
+      }
+    },
+    
+    "no_headers": {
+      "rcsMessage": {
+        "type": "richCard",
+        "title": "Quick Message",
+        "description": "This message has no headers - IDs will be auto-generated",
+        "actions": [
+          {"label": "✅ Got it", "action": "acknowledge", "type": "primary"},
+          {"label": "❓ Questions", "action": "questions", "type": "secondary"}
+        ]
+      }
+    }
+  }
+}
