@@ -1,0 +1,62 @@
+{
+  "messages": [
+    {
+      "richCard": {
+        "standaloneCard": {
+          "cardContent": {
+            "title": "Coffee Menu ☕",
+            "description": "Choose your favorite drink below:",
+            "media": {
+              "height": "MEDIUM",
+              "contentInfo": {
+                "fileUrl": "https://github.com/Dr-Agentic/rcs-emulator/blob/main/media/samples/capuccino.jpg?raw=true",
+                "mimeType": "image/jpeg"
+              }
+            },
+            "suggestions": [
+              {
+                "action": {
+                  "text": "Cappuccino",
+                  "postbackData": "order_cappuccino",
+                  "openUrlAction": {
+                    "url": "https://yourdomain.com/rcs/redirect/order?item=cappuccino"
+                  }
+                }
+              },
+              {
+                "action": {
+                  "text": "Latte",
+                  "postbackData": "order_latte",
+                  "openUrlAction": {
+                    "url": "https://yourdomain.com/rcs/redirect/order?item=latte"
+                  }
+                }
+              },
+              {
+                "action": {
+                  "text": "Cold Brew",
+                  "postbackData": "order_coldbrew",
+                  "openUrlAction": {
+                    "url": "https://yourdomain.com/rcs/redirect/order?item=coldbrew"
+                  }
+                }
+              },
+              {
+                "action": {
+                  "text": "More Info",
+                  "postbackData": "menu_info",
+                  "openUrlAction": {
+                    "url": "https://yourdomain.com/menu"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "text": "What would you like to order today? 😊"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "messageId": "msg_single_header_004",
+  "conversationId": "conv_single_demo",
+  "participantId": "+1555321654",
+  "timestamp": "2025-08-27T05:00:00.000Z",
+  "sender": "business",
+  "priority": "urgent",
+  "category": "alert",
+  "brandId": "security_alerts_789",
+  "type": "text",
+  "text": "Security Alert: New login detected from unknown device 🔒",
+  "suggestions": [
+    {
+      "action": {
+        "text": "✅ This was me",
+        "postbackData": "confirm_login"
+      }
+    },
+    {
+      "action": {
+        "text": "🚨 Not me - Secure account",
+        "postbackData": "secure_account"
+      }
+    },
+    {
+      "action": {
+        "text": "ℹ️ More info",
+        "postbackData": "login_details"
+      }
+    }
+  ]
+}

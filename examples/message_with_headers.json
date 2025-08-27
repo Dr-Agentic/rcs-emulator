@@ -1,0 +1,27 @@
+{
+  "messageId": "msg_header_test_001",
+  "conversationId": "conv_header_demo",
+  "participantId": "+1555123456",
+  "timestamp": "2025-08-27T05:00:00.000Z",
+  "sender": "business",
+  "priority": "normal",
+  "messages": [
+    {
+      "text": "Testing message with headers 📋",
+      "suggestions": [
+        {
+          "action": {
+            "text": "View Headers",
+            "postbackData": "view_headers"
+          }
+        },
+        {
+          "action": {
+            "text": "Continue",
+            "postbackData": "continue_flow"
+          }
+        }
+      ]
+    }
+  ]
+}

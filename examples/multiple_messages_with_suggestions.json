@@ -1,0 +1,39 @@
+{
+  "messages": [
+    {
+      "text": "Welcome to our store! 🛍️"
+    },
+    {
+      "text": "What would you like to do today?",
+      "suggestions": [
+        {
+          "action": {
+            "text": "📱 View Products",
+            "postbackData": "view_products"
+          }
+        },
+        {
+          "action": {
+            "text": "🛒 Place Order",
+            "postbackData": "place_order"
+          }
+        },
+        {
+          "action": {
+            "text": "📞 Contact Support",
+            "postbackData": "contact_support"
+          }
+        },
+        {
+          "action": {
+            "text": "📍 Find Store",
+            "postbackData": "find_store"
+          }
+        }
+      ]
+    },
+    {
+      "text": "We're here to help! 😊"
+    }
+  ]
+}

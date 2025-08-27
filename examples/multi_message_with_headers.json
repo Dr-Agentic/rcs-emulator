@@ -1,0 +1,63 @@
+{
+  "messageId": "msg_multi_header_003",
+  "conversationId": "conv_multi_demo",
+  "participantId": "+1555456789",
+  "timestamp": "2025-08-27T05:00:00.000Z",
+  "sender": "business",
+  "priority": "normal",
+  "category": "customer_service",
+  "brandId": "support_center_456",
+  "campaignId": "welcome_series_2025",
+  "messages": [
+    {
+      "text": "Welcome to our service! 👋"
+    },
+    {
+      "text": "Here's what you can do:",
+      "suggestions": [
+        {
+          "action": {
+            "text": "📱 Browse Products",
+            "postbackData": "browse_products"
+          }
+        },
+        {
+          "action": {
+            "text": "💬 Get Support",
+            "postbackData": "get_support"
+          }
+        }
+      ]
+    },
+    {
+      "richCard": {
+        "standaloneCard": {
+          "cardContent": {
+            "title": "Quick Actions",
+            "description": "Common tasks for new customers",
+            "suggestions": [
+              {
+                "action": {
+                  "text": "Account Setup",
+                  "postbackData": "setup_account"
+                }
+              },
+              {
+                "action": {
+                  "text": "Download App",
+                  "postbackData": "download_app",
+                  "openUrlAction": {
+                    "url": "https://app.example.com/download"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "text": "Need help? Just ask! 😊"
+    }
+  ]
+}

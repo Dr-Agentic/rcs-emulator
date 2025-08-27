@@ -1,0 +1,29 @@
+{
+  "type": "richCard",
+  "title": "Coffee Menu ☕",
+  "description": "Choose your favorite drink below:",
+  "image": "https://github.com/Dr-Agentic/rcs-emulator/blob/main/media/samples/capuccino.jpg?raw=true",
+  "actions": [
+    {
+      "label": "Cappuccino",
+      "action": "order_cappuccino",
+      "type": "primary"
+    },
+    {
+      "label": "Latte", 
+      "action": "order_latte",
+      "type": "secondary"
+    },
+    {
+      "label": "Cold Brew",
+      "action": "order_coldbrew", 
+      "type": "secondary"
+    },
+    {
+      "label": "More Info",
+      "action": "menu_info",
+      "type": "secondary"
+    }
+  ],
+  "sender": "business"
+}
