@@ -1,0 +1,19 @@
+{
+  "type": "text",
+  "text": "Test postback data extraction:",
+  "suggestions": [
+    {
+      "action": {
+        "text": "🛒 Place Order",
+        "postbackData": "place_order"
+      }
+    },
+    {
+      "action": {
+        "text": "📱 View Products",
+        "postbackData": "view_products"
+      }
+    }
+  ],
+  "sender": "business"
+}

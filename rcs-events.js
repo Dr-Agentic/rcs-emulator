@@ -2,8 +2,9 @@
 class RCSEventCapture {
     constructor() {
         this.conversationId = "conv_emulator_" + Date.now();
-        this.userId = "user_emulator";
+        this.participantId = "+15551234567"; // GSMA UP requires MSISDN or SIP URI format
         this.messageCounter = 1;
+        this.eventCounter = 1;
     }
 
     // Generate unique message ID
@@ -11,39 +12,47 @@ class RCSEventCapture {
         return `msg_${Date.now()}_${this.messageCounter++}`;
     }
 
-    // Format base event structure
+    // Generate unique event ID for GSMA UP compliance
+    generateEventId() {
+        return `evt_${Date.now()}_${this.eventCounter++}`;
+    }
+
+    // Format base event structure (GSMA UP compliant)
     formatBaseEvent(eventType, additionalData = {}) {
         return {
             eventType: eventType,
+            eventId: this.generateEventId(), // Required by GSMA UP
             timestamp: new Date().toISOString(),
             conversationId: this.conversationId,
-            userId: this.userId,
+            participantId: this.participantId, // GSMA UP field name
             ...additionalData
         };
     }
 
-    // Capture typing indicator event
-    captureTypingIndicator(typingStatus) {
-        const eventData = this.formatBaseEvent("user.typing", {
-            typingStatus: typingStatus // "started" or "stopped"
+    // Capture typing indicator event (GSMA UP compliant)
+    captureTypingIndicator(state) {
+        const eventData = this.formatBaseEvent("chatState", {
+            state: state === 'started' ? 'composing' : 'idle' // GSMA UP states
         });
 
         this.displayAndSend(eventData);
     }
 
-    // Capture user message event
+    // Capture user message event (GSMA UP compliant)
     captureUserMessage(text, mediaType = null, mediaUrl = null) {
         console.log('🔍 captureUserMessage called with:', { text, mediaType, mediaUrl });
         
         const messageId = this.generateMessageId();
         console.log('📝 Generated messageId:', messageId);
         
-        const eventData = this.formatBaseEvent("user.message", {
+        // GSMA UP compliant structure
+        const eventData = this.formatBaseEvent("userMessage", {
             messageId: messageId,
-            messageType: mediaType ? "media" : "text",
             content: mediaType ? {
-                mediaType: mediaType,
-                mediaUrl: mediaUrl,
+                media: {
+                    mediaType: mediaType,
+                    mediaUrl: mediaUrl
+                },
                 text: text || ""
             } : {
                 text: text
@@ -55,36 +64,69 @@ class RCSEventCapture {
         return messageId;
     }
 
-    // Capture action click event
-    captureActionClick(actionId, actionLabel, actionType, sourceMessageId, context = {}) {
-        const eventData = this.formatBaseEvent("action.clicked", {
-            actionId: actionId,
-            actionLabel: actionLabel,
-            actionType: actionType,
+    // Capture suggested reply (GSMA UP compliant) - returns userMessage
+    captureSuggestedReply(replyText, postbackData, sourceMessageId, context = {}) {
+        const messageId = this.generateMessageId();
+        const eventData = this.formatBaseEvent("userMessage", {
+            messageId: messageId,
+            content: {
+                text: replyText
+            },
+            // Additional context for business logic
+            _replyContext: {
+                sourceMessageId: sourceMessageId,
+                postbackData: postbackData,
+                type: "suggested_reply"
+            }
+        });
+
+        this.displayAndSend(eventData);
+        return messageId;
+    }
+
+    // Capture suggestion response (GSMA UP compliant) - for actions
+    captureSuggestionResponse(postbackData, displayText, responseType, sourceMessageId, actionUrl = null, context = {}) {
+        const eventData = this.formatBaseEvent("suggestionResponse", {
             sourceMessageId: sourceMessageId,
+            responseType: responseType, // "action", "reply", etc.
+            postbackData: postbackData,
+            displayText: displayText,
+            actionUrl: actionUrl, // For openUrlAction, dialAction, etc.
             context: context
         });
 
         this.displayAndSend(eventData);
     }
 
-    // Capture message status event
-    captureMessageStatus(messageId, status) {
-        const eventData = this.formatBaseEvent(`message.${status}`, {
+    // Capture delivery receipt (GSMA UP compliant)
+    captureDeliveryReceipt(messageId) {
+        const eventData = this.formatBaseEvent("deliveryReceipt", {
             messageId: messageId,
-            [`${status}At`]: new Date().toISOString()
+            deliveredTimestamp: new Date().toISOString()
         });
 
         this.displayAndSend(eventData);
     }
 
-    // Capture rich card interaction
+    // Capture read receipt (GSMA UP compliant)
+    captureReadReceipt(messageId) {
+        const eventData = this.formatBaseEvent("readReceipt", {
+            messageId: messageId,
+            readTimestamp: new Date().toISOString()
+        });
+
+        this.displayAndSend(eventData);
+    }
+
+    // Capture rich card interaction (VENDOR EXTENSION - not official GSMA UP)
     captureCardInteraction(cardId, interactionType, sourceMessageId, cardContext = {}) {
-        const eventData = this.formatBaseEvent("card.clicked", {
+        const eventData = this.formatBaseEvent("richCardInteraction", {
+            messageId: this.generateMessageId(),
             cardId: cardId,
             interactionType: interactionType,
             sourceMessageId: sourceMessageId,
-            cardContext: cardContext
+            cardContext: cardContext,
+            _vendorExtension: true // Mark as non-standard
         });
 
         this.displayAndSend(eventData);

@@ -136,17 +136,48 @@ const _parseGoogleSuggestions = (suggestions) => {
     if (!Array.isArray(suggestions)) return [];
     
     return suggestions.map(suggestion => {
-        if (suggestion.action) {
+        // Handle reply suggestions
+        if (suggestion.reply) {
             return {
-                label: suggestion.action.text || '',
-                action: suggestion.action.postbackData || '',
-                type: _mapGoogleActionType(suggestion.action)
+                type: 'reply',
+                text: suggestion.reply.text || '',
+                postbackData: suggestion.reply.postbackData || '',
+                displayText: suggestion.reply.text || ''
             };
         }
+        
+        // Handle action suggestions
+        if (suggestion.action) {
+            const action = {
+                type: 'action',
+                text: suggestion.action.text || '',
+                postbackData: suggestion.action.postbackData || '',
+                displayText: suggestion.action.text || ''
+            };
+            
+            // Add specific action types
+            if (suggestion.action.openUrlAction) {
+                action.actionType = 'openUrl';
+                action.url = suggestion.action.openUrlAction.url;
+            } else if (suggestion.action.dialAction) {
+                action.actionType = 'dial';
+                action.phoneNumber = suggestion.action.dialAction.phoneNumber;
+            } else if (suggestion.action.shareLocationAction) {
+                action.actionType = 'shareLocation';
+            } else {
+                action.actionType = 'generic';
+            }
+            
+            return action;
+        }
+        
+        // Fallback for legacy format
         return {
-            label: suggestion.text || '',
-            action: suggestion.postbackData || '',
-            type: 'secondary'
+            type: 'action',
+            text: suggestion.text || '',
+            postbackData: suggestion.postbackData || '',
+            displayText: suggestion.text || '',
+            actionType: 'generic'
         };
     });
 };
@@ -271,10 +302,48 @@ const _parseActions = (actions) => {
 const _parseSuggestedActions = (suggestions) => {
     if (!Array.isArray(suggestions)) return [];
     
-    return suggestions.map(suggestion => ({
-        label: suggestion.label || suggestion.text || '',
-        action: suggestion.action || suggestion.postbackData || ''
-    }));
+    return suggestions.map(suggestion => {
+        // Handle GSMA UP format with reply/action structure
+        if (suggestion.reply) {
+            return {
+                type: 'reply',
+                text: suggestion.reply.text || '',
+                postbackData: suggestion.reply.postbackData || '',
+                displayText: suggestion.reply.text || ''
+            };
+        }
+        
+        if (suggestion.action) {
+            const action = {
+                type: 'action',
+                text: suggestion.action.text || '',
+                postbackData: suggestion.action.postbackData || '',
+                displayText: suggestion.action.text || ''
+            };
+            
+            // Determine action type
+            if (suggestion.action.openUrlAction) {
+                action.actionType = 'openUrl';
+                action.url = suggestion.action.openUrlAction.url;
+            } else if (suggestion.action.dialAction) {
+                action.actionType = 'dial';
+                action.phoneNumber = suggestion.action.dialAction.phoneNumber;
+            } else {
+                action.actionType = 'generic';
+            }
+            
+            return action;
+        }
+        
+        // Legacy format fallback
+        return {
+            type: 'action',
+            text: suggestion.label || suggestion.text || '',
+            postbackData: suggestion.action || suggestion.postbackData || '',
+            displayText: suggestion.label || suggestion.text || '',
+            actionType: 'generic'
+        };
+    });
 };
 
 const _mapParsedToUI = (parsedMessage, baseMessage) => {

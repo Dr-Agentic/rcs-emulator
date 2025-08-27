@@ -342,9 +342,18 @@ class RCSEmulator {
     renderSuggestedActions(actions) {
         return `
             <div class="suggested-actions">
-                ${actions.map(action => 
-                    `<button class="suggested-action" onclick="sendSuggestedAction('${action.label || action.text}', '${action.action || ''}')">${action.label || action.text}</button>`
-                ).join('')}
+                ${actions.map((action, index) => {
+                    // Handle GSMA UP compliant format
+                    const displayText = action.displayText || action.text || action.label || '';
+                    const postbackData = action.postbackData || action.action || '';
+                    const suggestionType = action.type || 'action'; // reply or action
+                    
+                    return `<button class="suggested-action" 
+                                   data-suggestion-type="${suggestionType}"
+                                   data-postback="${postbackData}"
+                                   data-display-text="${displayText}"
+                                   data-action-index="${index}">${displayText}</button>`;
+                }).join('')}
             </div>
         `;
     }
@@ -782,20 +791,50 @@ window.handleRichCardAction = function(action, context = {}) {
     }
 };
 
-window.sendSuggestedAction = function(text, action = '') {
+window.sendSuggestedAction = function(displayText, postbackData = '', suggestionType = 'action') {
     if (window.rcsEmulator) {
-        // Send interaction to configured server
+        // Find the source message ID (latest business message)
+        const messages = document.querySelectorAll('.message.received');
+        const sourceMessageId = messages.length > 0 ? 
+            messages[messages.length - 1].dataset.messageId || 'msg_' + Date.now() : 
+            'msg_unknown';
+        
+        // Capture the appropriate event based on suggestion type
+        if (suggestionType === 'reply') {
+            // Handle as suggested reply (generates userMessage)
+            if (window.rcsEventCapture) {
+                window.rcsEventCapture.captureSuggestedReply(displayText, postbackData, sourceMessageId, {});
+            }
+            
+            // Send the reply text as a user message
+            window.rcsEmulator.messageInput.value = displayText;
+            window.rcsEmulator.sendMessage();
+        } else {
+            // Handle as suggestion action (generates suggestionResponse)
+            if (window.rcsEventCapture) {
+                window.rcsEventCapture.captureSuggestionResponse(
+                    postbackData, 
+                    displayText, 
+                    'action', 
+                    sourceMessageId, 
+                    null, // actionUrl
+                    { buttonType: 'suggested-action' }
+                );
+            }
+            
+            // For actions, we don't send a user message, just capture the event
+            console.log(`Suggestion action triggered: ${displayText} (${postbackData})`);
+        }
+        
+        // Legacy interaction tracking
         window.rcsEmulator.sendUserInteraction({
             type: 'action',
             actionType: 'suggested_action',
-            text: text,
-            action: action,
+            text: displayText,
+            action: postbackData,
+            suggestionType: suggestionType,
             userId: window.rcsEmulator.getUserId()
         });
-        
-        // Send the message
-        window.rcsEmulator.messageInput.value = text;
-        window.rcsEmulator.sendMessage();
     }
 };
 
@@ -1070,6 +1109,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }, true);
+    
+    // Add click listeners for suggested action buttons
+    document.addEventListener('click', (e) => {
+        if (e.target && e.target.classList && e.target.classList.contains('suggested-action')) {
+            const button = e.target;
+            const displayText = button.dataset.displayText || button.textContent.trim();
+            const postbackData = button.dataset.postback || '';
+            const suggestionType = button.dataset.suggestionType || 'action';
+            
+            // Call the sendSuggestedAction function with proper parameters
+            sendSuggestedAction(displayText, postbackData, suggestionType);
+        }
+    });
 });
 // Global collapsible toggle function
 function toggleCollapsible(header) {

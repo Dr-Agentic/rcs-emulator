@@ -225,22 +225,30 @@ class Dashboard {
             suggestedActions: {
                 type: "text",
                 text: "What would you like to do today?",
-                suggestedActions: [
+                suggestions: [
                     {
-                        label: "📱 View Products",
-                        action: "view_products"
+                        action: {
+                            text: "📱 View Products",
+                            postbackData: "view_products"
+                        }
                     },
                     {
-                        label: "🛒 Place Order",
-                        action: "place_order"
+                        action: {
+                            text: "🛒 Place Order",
+                            postbackData: "place_order"
+                        }
                     },
                     {
-                        label: "📞 Contact Support",
-                        action: "contact_support"
+                        action: {
+                            text: "📞 Contact Support",
+                            postbackData: "contact_support"
+                        }
                     },
                     {
-                        label: "📍 Find Store",
-                        action: "find_store"
+                        action: {
+                            text: "📍 Find Store",
+                            postbackData: "find_store"
+                        }
                     }
                 ],
                 sender: "business"

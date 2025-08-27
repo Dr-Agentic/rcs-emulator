@@ -19,14 +19,14 @@ function initializeEventCapture() {
             // User started typing
             if (!isTyping) {
                 isTyping = true;
-                window.rcsEventCapture.captureTypingIndicator('started');
+                window.rcsEventCapture.captureTypingIndicator('started'); // Will be converted to 'composing'
             }
             
             // Reset typing timer
             clearTimeout(typingTimer);
             typingTimer = setTimeout(() => {
                 isTyping = false;
-                window.rcsEventCapture.captureTypingIndicator('stopped');
+                window.rcsEventCapture.captureTypingIndicator('stopped'); // Will be converted to 'idle'
             }, 2000); // Stop typing after 2 seconds of inactivity
         });
         
@@ -43,7 +43,7 @@ function initializeEventCapture() {
                 if (isTyping) {
                     clearTimeout(typingTimer);
                     isTyping = false;
-                    window.rcsEventCapture.captureTypingIndicator('stopped');
+                    window.rcsEventCapture.captureTypingIndicator('stopped'); // Will be converted to 'idle'
                 }
                 
                 // Capture user message event (MAIN EVENT for business servers)
@@ -91,8 +91,8 @@ function initializeActionButtonCapture() {
             e.target.classList.contains('carousel-action')) {
             
             const button = e.target;
-            const actionId = extractActionFromOnClick(button.getAttribute('onclick'));
-            const actionLabel = button.textContent.trim();
+            const postbackData = extractActionFromOnClick(button.getAttribute('onclick'));
+            const displayText = button.textContent.trim();
             const actionType = button.classList.contains('primary') ? 'primary' : 'secondary';
             
             // Find source message context
@@ -106,23 +106,51 @@ function initializeActionButtonCapture() {
                 cardDescription: cardElement.querySelector('.rich-card-description, .carousel-description')?.textContent || ''
             } : {};
             
-            // Capture action click event
-            window.rcsEventCapture.captureActionClick(actionId, actionLabel, actionType, sourceMessageId, context);
+            // Check if this is a URL action
+            const actionUrl = button.dataset.url || null;
+            
+            // Capture suggestion response (GSMA UP compliant)
+            window.rcsEventCapture.captureSuggestionResponse(
+                postbackData, 
+                displayText, 
+                'action', 
+                sourceMessageId, 
+                actionUrl, 
+                context
+            );
         }
         
-        // Check for suggested actions
+        // Check for suggested actions (quick replies vs actions)
         if (e.target.classList.contains('suggested-action')) {
             const button = e.target;
-            const actionId = extractActionFromOnClick(button.getAttribute('onclick'));
-            const actionLabel = button.textContent.trim();
-            const actionType = 'quick_reply';
+            const postbackData = extractActionFromOnClick(button.getAttribute('onclick'));
+            const displayText = button.textContent.trim();
+            const suggestionType = button.dataset.suggestionType || 'action'; // reply or action
             
             // Find source message context
             const messageElement = button.closest('.message');
             const sourceMessageId = messageElement ? messageElement.dataset.messageId || 'msg_' + Date.now() : 'msg_unknown';
             
-            // Capture action click event
-            window.rcsEventCapture.captureActionClick(actionId, actionLabel, actionType, sourceMessageId, {});
+            if (suggestionType === 'reply') {
+                // Handle as suggested reply (returns userMessage)
+                window.rcsEventCapture.captureSuggestedReply(
+                    displayText, 
+                    postbackData, 
+                    sourceMessageId, 
+                    {}
+                );
+            } else {
+                // Handle as suggestion action (returns suggestionResponse)
+                const actionUrl = button.dataset.url || null;
+                window.rcsEventCapture.captureSuggestionResponse(
+                    postbackData, 
+                    displayText, 
+                    'action', 
+                    sourceMessageId, 
+                    actionUrl, 
+                    {}
+                );
+            }
         }
     });
 }
@@ -184,10 +212,10 @@ function overrideRichCardActions() {
 function overrideSuggestedActions() {
     const originalSendSuggestedAction = window.sendSuggestedAction;
     
-    window.sendSuggestedAction = function(label, action) {
+    window.sendSuggestedAction = function(displayText, postbackData = '', suggestionType = 'action') {
         // Call original function first
         if (originalSendSuggestedAction) {
-            originalSendSuggestedAction(label, action);
+            originalSendSuggestedAction(displayText, postbackData, suggestionType);
         }
         
         // Our event capture is already handled by click listeners
@@ -199,7 +227,7 @@ function overrideSuggestedActions() {
 function extractActionFromOnClick(onclickStr) {
     if (!onclickStr) return 'unknown_action';
     
-    // Extract action from handleRichCardAction('action_name') or sendSuggestedAction('label', 'action')
+    // Extract action from handleRichCardAction('action_name') or sendSuggestedAction('displayText', 'postbackData', 'suggestionType')
     const match = onclickStr.match(/'([^']+)'/);
     return match ? match[1].toLowerCase().replace(/\s+/g, '_') : 'unknown_action';
 }
