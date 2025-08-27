@@ -346,9 +346,23 @@ class Dashboard {
         const serverUrlInput = document.getElementById('rcsServerUrl');
         const authTokenInput = document.getElementById('authToken');
         
-        if (serverUrlInput && config.serverUrl) {
-            serverUrlInput.value = config.serverUrl;
+        if (serverUrlInput) {
+            if (config.serverUrl) {
+                // Use saved configuration
+                serverUrlInput.value = config.serverUrl;
+            } else {
+                // Auto-populate with local RBM callback URL (same logic as curl command)
+                const baseUrl = window.location.origin;
+                const rbmCallbackUrl = `${baseUrl}/api/rbm/callback`;
+                serverUrlInput.value = rbmCallbackUrl;
+                
+                // Save this as the default
+                this.saveServerConfig(false); // Silent save
+                
+                console.log('Auto-populated RCS Server URL:', rbmCallbackUrl);
+            }
         }
+        
         if (authTokenInput && config.authToken) {
             authTokenInput.value = config.authToken;
         }

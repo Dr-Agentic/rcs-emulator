@@ -380,7 +380,7 @@ or
                         </div>
                         
                         <div id="webhookStatus" class="webhook-status info">
-                            Configure webhook URL below to receive events
+                            RBM server URL auto-configured below - events will be sent automatically
                         </div>
                     </div>
                 </div>
@@ -390,12 +390,12 @@ or
                         <input 
                             type="url" 
                             id="rcsServerUrl" 
-                            placeholder="https://your-server.com/rcs/webhook" 
+                            placeholder="http://localhost:3000/api/rbm/callback" 
                             class="server-input"
                         >
                         <div class="input-help">
                             <span class="help-icon">💡</span>
-                            <span class="help-text">Your server will receive POST requests with user interaction data</span>
+                            <span class="help-text">Your RBM server will receive GSMA UP compliant RCS events (button clicks, messages, typing indicators)</span>
                         </div>
                     </div>
 
