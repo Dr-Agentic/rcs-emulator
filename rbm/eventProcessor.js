@@ -106,7 +106,8 @@ class EventProcessor {
             responseType, 
             actionUrl,
             conversationId, 
-            participantId 
+            participantId,
+            context 
         } = event;
         
         console.log('🔘 BUTTON CLICKED:');
@@ -118,19 +119,30 @@ class EventProcessor {
         if (actionUrl) {
             console.log(`   Action URL: ${actionUrl}`);
         }
+        
+        // Log rich card context if available
+        if (context && (context.cardTitle || context.cardDescription)) {
+            console.log('📋 CARD CONTEXT:');
+            if (context.cardTitle) console.log(`   Card Title: "${context.cardTitle}"`);
+            if (context.cardDescription) console.log(`   Card Description: "${context.cardDescription}"`);
+            if (context.actionType) console.log(`   Action Type: ${context.actionType}`);
+            if (context.cardIndex !== undefined) console.log(`   Card Index: ${context.cardIndex}`);
+        }
 
         // Process the action
-        const actionResult = this._processAction(postbackData, displayText);
+        const actionResult = this._processAction(postbackData, displayText, context);
         console.log('🎯 ACTION PROCESSING:');
         console.log(`   Intent: ${actionResult.intent}`);
         console.log(`   Next Step: ${actionResult.nextStep}`);
+        if (actionResult.description) console.log(`   Description: ${actionResult.description}`);
 
         return {
             type: 'suggestionResponse',
             processed: true,
             action: postbackData,
             displayText,
-            actionResult
+            actionResult,
+            context
         };
     }
 
@@ -165,7 +177,7 @@ class EventProcessor {
     }
 
     // Process specific actions based on postbackData
-    _processAction(postbackData, displayText) {
+    _processAction(postbackData, displayText, context = {}) {
         console.log(`🎯 Processing action: ${postbackData}`);
 
         // Action processing logic based on postbackData
@@ -202,12 +214,77 @@ class EventProcessor {
                     description: 'User wants to find nearby store'
                 };
             
+            // Rich card specific actions
+            case 'order_coffee':
+                return {
+                    action: 'order_coffee',
+                    intent: 'product_order',
+                    nextStep: 'add_to_cart',
+                    description: 'User wants to order coffee',
+                    productType: 'coffee',
+                    cardContext: context.cardTitle || 'Coffee product'
+                };
+            
+            case 'view_menu':
+                return {
+                    action: 'view_menu',
+                    intent: 'menu_inquiry',
+                    nextStep: 'show_menu',
+                    description: 'User wants to view menu options',
+                    menuType: 'coffee_menu'
+                };
+            
+            case 'buy_now':
+            case 'buy_iphone':
+                return {
+                    action: postbackData,
+                    intent: 'immediate_purchase',
+                    nextStep: 'redirect_to_checkout',
+                    description: 'User wants to buy product immediately',
+                    productType: postbackData === 'buy_iphone' ? 'iphone' : 'general',
+                    cardContext: context.cardTitle || 'Product'
+                };
+            
+            case 'learn_more':
+                return {
+                    action: 'learn_more',
+                    intent: 'information_request',
+                    nextStep: 'show_product_details',
+                    description: 'User wants more product information',
+                    cardContext: context.cardTitle || 'Product'
+                };
+            
+            case 'open_maps':
+                return {
+                    action: 'open_maps',
+                    intent: 'location_request',
+                    nextStep: 'open_maps_app',
+                    description: 'User wants to open location in maps'
+                };
+            
+            case 'add_contact':
+                return {
+                    action: 'add_contact',
+                    intent: 'contact_management',
+                    nextStep: 'add_to_contacts',
+                    description: 'User wants to add contact to address book'
+                };
+            
+            case 'call_contact':
+                return {
+                    action: 'call_contact',
+                    intent: 'communication_request',
+                    nextStep: 'initiate_call',
+                    description: 'User wants to make a phone call'
+                };
+            
             default:
                 return {
                     action: postbackData,
                     intent: 'unknown',
                     nextStep: 'log_and_continue',
-                    description: `Generic action: ${displayText}`
+                    description: `Generic action: ${displayText}`,
+                    cardContext: context.cardTitle || null
                 };
         }
     }

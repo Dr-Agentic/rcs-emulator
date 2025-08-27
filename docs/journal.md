@@ -1,5 +1,87 @@
 # Development Journal
 
+## Rich Card RBM Server Integration - August 27, 2025
+
+**Feature**: Rich Card Button Actions with GSMA UP Compliant RBM Server Processing
+
+**Started**: August 27, 2025
+**Finished**: August 27, 2025
+
+**What was implemented**:
+- Updated rich card button rendering to use data attributes instead of onclick handlers
+- Enhanced RBM event processor to handle rich card actions with context
+- Added comprehensive action processing for coffee shop, e-commerce, and contact scenarios
+- Integrated rich card interactions with existing GSMA UP compliant event capture system
+- Removed legacy sendUserInteraction calls to prevent duplicate events
+
+**Files modified**:
+- `script.js` - Updated renderRichCard() and carousel rendering to use data attributes
+- `rcs-event-handlers.js` - Enhanced rich card action capture with data attribute support
+- `rbm/eventProcessor.js` - Added rich card action processing and context logging
+- `test_rich_card.json` - Test file for rich card functionality
+
+**Rich Card Actions Supported**:
+- `order_coffee` - Coffee ordering with cart integration
+- `view_menu` - Menu display functionality  
+- `buy_now` / `buy_iphone` - Immediate purchase flow
+- `learn_more` - Product information requests
+- `open_maps` - Location services integration
+- `add_contact` / `call_contact` - Contact management
+- All existing suggested actions (view_products, place_order, etc.)
+
+**Design adopted**:
+- **Data Attribute Architecture**: Rich card buttons use `data-postback`, `data-display-text`, `data-action-type`
+- **Context Preservation**: Card title, description, and action type passed to RBM server
+- **Unified Event Processing**: Rich card actions generate same GSMA UP suggestionResponse events as suggested actions
+- **Enhanced Business Logic**: Action processor recognizes product types, menu categories, and interaction contexts
+- **Clean Event Flow**: Single event per button click with comprehensive context logging
+
+**RBM Server Console Output Enhanced**:
+```
+🔘 BUTTON CLICKED:
+   Button Text: "Order Coffee"
+   Postback Data: order_coffee
+   Response Type: action
+   Source Message: msg_123
+📋 CARD CONTEXT:
+   Card Title: "Coffee Time ☕"
+   Card Description: "Start your morning with..."
+   Action Type: primary
+🎯 ACTION PROCESSING:
+   Intent: product_order
+   Next Step: add_to_cart
+   Description: User wants to order coffee
+```
+
+**Difficulties encountered and solutions**:
+1. **Onclick vs Data Attributes**: Rich cards used onclick handlers while suggested actions used data attributes
+   - **Solution**: Standardized all button interactions to use data attributes for consistency
+
+2. **Context Loss**: Rich card context (title, description) wasn't being passed to RBM server
+   - **Solution**: Enhanced event capture to extract and pass card context in GSMA UP events
+
+3. **Action Processing**: RBM server didn't recognize rich card specific actions
+   - **Solution**: Extended _processAction() method with coffee shop, e-commerce, and contact scenarios
+
+4. **Legacy Event Duplication**: handleRichCardAction still had sendUserInteraction calls
+   - **Solution**: Removed legacy calls to prevent duplicate non-GSMA UP events
+
+**Testing performed**:
+- Verified rich card rendering with data attributes
+- Tested button clicks generate single GSMA UP compliant events
+- Confirmed card context (title, description, action type) passed to RBM server
+- Validated action processing for coffee ordering and menu viewing
+- Ensured no duplicate or malformed events
+
+**Result**: Rich card interactions now fully integrated with RBM server, generating clean GSMA UP compliant events with comprehensive context. Business logic can distinguish between different product types, action priorities, and card contexts for sophisticated conversation flows.
+
+**Next Steps**: 
+- Test carousel card interactions
+- Add URL action support for rich cards
+- Implement persistent conversation context for multi-turn flows
+
+---
+
 ## Business RBM Server Implementation - August 27, 2025
 
 **Feature**: GSMA UP Compliant Business RCS Server Integration

@@ -1,0 +1,19 @@
+{
+  "type": "richCard",
+  "title": "Coffee Time ☕",
+  "description": "Start your morning with the perfect cup of coffee. Fresh roasted beans delivered to your door.",
+  "image": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&h=200&fit=crop",
+  "actions": [
+    {
+      "label": "Order Coffee",
+      "action": "order_coffee",
+      "type": "primary"
+    },
+    {
+      "label": "View Menu",
+      "action": "view_menu",
+      "type": "secondary"
+    }
+  ],
+  "sender": "business"
+}

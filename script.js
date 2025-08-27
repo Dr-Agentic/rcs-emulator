@@ -302,7 +302,12 @@ class RCSEmulator {
                                 ${card.actions && card.actions.length > 0 ? `
                                     <div class="carousel-actions">
                                         ${card.actions.map(action => 
-                                            `<button class="carousel-action ${action.type || ''}" onclick="handleRichCardAction('${action.action}', {cardTitle: '${card.title}', cardIndex: ${index}})">${this.escapeHtml(action.label)}</button>`
+                                            `<button class="carousel-action ${action.type || ''}" 
+                                                    data-postback="${action.action}"
+                                                    data-display-text="${action.label}"
+                                                    data-action-type="${action.type || 'secondary'}"
+                                                    data-card-title="${card.title}"
+                                                    data-card-index="${index}">${this.escapeHtml(action.label)}</button>`
                                         ).join('')}
                                     </div>
                                 ` : ''}
@@ -331,7 +336,10 @@ class RCSEmulator {
                     <p class="rich-card-description">${this.escapeHtml(card.description)}</p>
                     <div class="rich-card-actions">
                         ${card.actions.map(action => 
-                            `<button class="rich-card-action ${action.type || ''}" onclick="handleRichCardAction('${action.action}')">${action.label}</button>`
+                            `<button class="rich-card-action ${action.type || ''}" 
+                                    data-postback="${action.action}"
+                                    data-display-text="${action.label}"
+                                    data-action-type="${action.type || 'secondary'}">${action.label}</button>`
                         ).join('')}
                     </div>
                 </div>
@@ -747,19 +755,8 @@ class RCSEmulator {
 window.handleRichCardAction = function(action, context = {}) {
     console.log('Rich card action:', action);
     
-    // Send interaction to configured server
-    if (window.rcsEmulator) {
-        window.rcsEmulator.sendUserInteraction({
-            type: 'action',
-            actionType: 'button_click',
-            action: action,
-            userId: window.rcsEmulator.getUserId(),
-            context: {
-                ...context,
-                timestamp: new Date().toISOString()
-            }
-        });
-    }
+    // NOTE: Legacy sendUserInteraction removed - now using GSMA UP compliant
+    // event capture via rcs-event-handlers.js for rich card button clicks
     
     // Handle rich card actions here
     switch (action) {

@@ -91,9 +91,9 @@ function initializeActionButtonCapture() {
             e.target.classList.contains('carousel-action')) {
             
             const button = e.target;
-            const postbackData = extractActionFromOnClick(button.getAttribute('onclick'));
-            const displayText = button.textContent.trim();
-            const actionType = button.classList.contains('primary') ? 'primary' : 'secondary';
+            const postbackData = button.dataset.postback || 'unknown_action';
+            const displayText = button.dataset.displayText || button.textContent.trim();
+            const actionType = button.dataset.actionType || 'secondary';
             
             // Find source message context
             const messageElement = button.closest('.message');
@@ -103,8 +103,15 @@ function initializeActionButtonCapture() {
             const cardElement = button.closest('.rich-card, .carousel-card');
             const context = cardElement ? {
                 cardTitle: cardElement.querySelector('.rich-card-title, .carousel-title')?.textContent || '',
-                cardDescription: cardElement.querySelector('.rich-card-description, .carousel-description')?.textContent || ''
+                cardDescription: cardElement.querySelector('.rich-card-description, .carousel-description')?.textContent || '',
+                actionType: actionType
             } : {};
+            
+            // Add carousel-specific context
+            if (button.classList.contains('carousel-action')) {
+                context.cardIndex = button.dataset.cardIndex || '0';
+                context.cardTitle = button.dataset.cardTitle || context.cardTitle;
+            }
             
             // Check if this is a URL action
             const actionUrl = button.dataset.url || null;
