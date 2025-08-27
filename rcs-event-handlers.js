@@ -79,8 +79,8 @@ function initializeEventCapture() {
     // Override existing handleRichCardAction function
     overrideRichCardActions();
     
-    // Override existing sendSuggestedAction function
-    overrideSuggestedActions();
+    // NOTE: overrideSuggestedActions() removed - no longer needed since
+    // suggested-action handling is now exclusively handled by script.js
 }
 
 function initializeActionButtonCapture() {
@@ -120,38 +120,8 @@ function initializeActionButtonCapture() {
             );
         }
         
-        // Check for suggested actions (quick replies vs actions)
-        if (e.target.classList.contains('suggested-action')) {
-            const button = e.target;
-            const postbackData = extractActionFromOnClick(button.getAttribute('onclick'));
-            const displayText = button.textContent.trim();
-            const suggestionType = button.dataset.suggestionType || 'action'; // reply or action
-            
-            // Find source message context
-            const messageElement = button.closest('.message');
-            const sourceMessageId = messageElement ? messageElement.dataset.messageId || 'msg_' + Date.now() : 'msg_unknown';
-            
-            if (suggestionType === 'reply') {
-                // Handle as suggested reply (returns userMessage)
-                window.rcsEventCapture.captureSuggestedReply(
-                    displayText, 
-                    postbackData, 
-                    sourceMessageId, 
-                    {}
-                );
-            } else {
-                // Handle as suggestion action (returns suggestionResponse)
-                const actionUrl = button.dataset.url || null;
-                window.rcsEventCapture.captureSuggestionResponse(
-                    postbackData, 
-                    displayText, 
-                    'action', 
-                    sourceMessageId, 
-                    actionUrl, 
-                    {}
-                );
-            }
-        }
+        // NOTE: suggested-action handling removed - now handled by script.js
+        // This eliminates duplicate event processing for suggested action buttons
     });
 }
 
@@ -201,21 +171,6 @@ function overrideRichCardActions() {
         // Call original function first
         if (originalHandleRichCardAction) {
             originalHandleRichCardAction(action, context);
-        }
-        
-        // Our event capture is already handled by click listeners
-        // This override ensures compatibility with existing code
-    };
-}
-
-// Override the existing sendSuggestedAction function to capture events
-function overrideSuggestedActions() {
-    const originalSendSuggestedAction = window.sendSuggestedAction;
-    
-    window.sendSuggestedAction = function(displayText, postbackData = '', suggestionType = 'action') {
-        // Call original function first
-        if (originalSendSuggestedAction) {
-            originalSendSuggestedAction(displayText, postbackData, suggestionType);
         }
         
         // Our event capture is already handled by click listeners

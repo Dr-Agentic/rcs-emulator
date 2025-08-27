@@ -826,15 +826,8 @@ window.sendSuggestedAction = function(displayText, postbackData = '', suggestion
             console.log(`Suggestion action triggered: ${displayText} (${postbackData})`);
         }
         
-        // Legacy interaction tracking
-        window.rcsEmulator.sendUserInteraction({
-            type: 'action',
-            actionType: 'suggested_action',
-            text: displayText,
-            action: postbackData,
-            suggestionType: suggestionType,
-            userId: window.rcsEmulator.getUserId()
-        });
+        // NOTE: Legacy interaction tracking removed - now using GSMA UP compliant
+        // event capture via rcsEventCapture.captureSuggestionResponse() above
     }
 };
 

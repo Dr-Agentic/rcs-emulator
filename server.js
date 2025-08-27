@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const url = require('url');
 const MessageFormatHandler = require('./MessageFormatHandler.js');
+const RBMCallbackHandler = require('./rbm/callbackHandler.js');
 
 class RCSServer {
     constructor(port = process.env.PORT || 3000) {
@@ -12,6 +13,10 @@ class RCSServer {
         this.validApiKey = 'rcs_demo_key_12345'; // In production, this would be stored securely
         this.messageQueue = [];
         this.sseClients = []; // Store SSE connections
+        
+        // Initialize RBM callback handler
+        this.rbmHandler = new RBMCallbackHandler();
+        
         this.setupServer();
     }
 
@@ -25,6 +30,9 @@ class RCSServer {
         const parsedUrl = url.parse(req.url, true);
         const pathname = parsedUrl.pathname;
         const method = req.method;
+
+        // Add query parameters to request object for RBM handlers
+        req.query = parsedUrl.query;
 
         // Enable CORS
         res.setHeader('Access-Control-Allow-Origin', '*');
@@ -61,6 +69,12 @@ class RCSServer {
             await this.handleValidateAuth(req, res);
         } else if (pathname === '/api/events' && method === 'GET') {
             await this.handleSSE(req, res);
+        } else if (pathname === '/api/rbm/callback' && method === 'POST') {
+            await this.handleRBMCallback(req, res);
+        } else if (pathname === '/api/rbm/callback' && method === 'GET') {
+            await this.handleRBMValidation(req, res);
+        } else if (pathname === '/api/rbm/status' && method === 'GET') {
+            await this.handleRBMStatus(req, res);
         } else {
             this.sendJsonResponse(res, 404, { error: 'API endpoint not found' });
         }
@@ -211,6 +225,38 @@ class RCSServer {
         return result;
     }
 
+    // RBM Callback Handlers
+    async handleRBMCallback(req, res) {
+        console.log('📥 RBM Callback request received');
+        
+        try {
+            // Get request body
+            const body = await this.getRequestBody(req);
+            req.body = JSON.parse(body);
+            
+            // Delegate to RBM handler
+            await this.rbmHandler.handleCallback(req, res);
+            
+        } catch (error) {
+            console.error('❌ Error in RBM callback:', error);
+            this.sendJsonResponse(res, 500, {
+                success: false,
+                error: 'Failed to process RBM callback',
+                message: error.message
+            });
+        }
+    }
+
+    async handleRBMValidation(req, res) {
+        console.log('🔐 RBM Validation request received');
+        await this.rbmHandler.handleValidation(req, res);
+    }
+
+    async handleRBMStatus(req, res) {
+        console.log('📊 RBM Status request received');
+        await this.rbmHandler.handleStatus(req, res);
+    }
+
     async serveStaticFile(req, res, pathname) {
         // Default to index.html for root path
         if (pathname === '/') {
@@ -286,6 +332,8 @@ class RCSServer {
             console.log(`📱 Access the emulator at: http://${this.host}:${this.port}`);
             console.log(`📚 API Documentation: http://${this.host}:${this.port}/dashboard.html#api-docs`);
             console.log(`🔑 Demo credentials: user/user`);
+            console.log(`📡 RBM Callback endpoint: http://${this.host}:${this.port}/api/rbm/callback`);
+            console.log(`📊 RBM Status endpoint: http://${this.host}:${this.port}/api/rbm/status`);
         });
         
         // Graceful shutdown

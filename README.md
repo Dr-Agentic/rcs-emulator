@@ -23,6 +23,8 @@ A professional RCS (Rich Communication Services) business messaging development 
 ### SaaS Platform Features
 - ✅ **User Authentication** - Secure login system with session management
 - ✅ **API Integration** - RESTful API for programmatic message sending
+- ✅ **RBM Callback Server** - GSMA UP compliant event processing endpoint
+- ✅ **Event Analytics** - RCS interaction tracking and conversation management
 - ✅ **Developer Tools** - JSON validation and message templates
 - ✅ **Usage Analytics** - API usage tracking and limits
 - ✅ **Comprehensive Documentation** - Complete API reference with examples
@@ -113,6 +115,16 @@ Authorization: Bearer YOUR_API_KEY
 - **POST** `/api/auth/validate`
 - **Headers**: `Authorization`
 - **Response**: Authentication status
+
+### RBM Callback (Business Messaging)
+- **POST** `/api/rbm/callback`
+- **Headers**: `Content-Type: application/json`
+- **Body**: GSMA UP compliant RCS event
+- **Response**: Event processing confirmation
+
+### RBM Status
+- **GET** `/api/rbm/status`
+- **Response**: RBM server health and statistics
 
 ## 🎯 Use Cases
 

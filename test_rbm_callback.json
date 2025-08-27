@@ -1,0 +1,11 @@
+{
+  "eventType": "userMessage",
+  "eventId": "evt_test_123",
+  "timestamp": "2025-08-27T01:42:00.000Z",
+  "conversationId": "conv_test_456",
+  "participantId": "+15551234567",
+  "messageId": "msg_test_789",
+  "content": {
+    "text": "Hello from RBM test!"
+  }
+}
