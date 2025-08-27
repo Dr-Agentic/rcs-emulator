@@ -215,18 +215,8 @@ class RCSEventCapture {
         }
     }
 
-    // Manual send to webhook
-    manualSend() {
-        const jsonViewer = document.getElementById('eventJsonViewer');
-        if (jsonViewer && jsonViewer.textContent) {
-            try {
-                const eventData = JSON.parse(jsonViewer.textContent);
-                this.sendToWebhook(eventData);
-            } catch (error) {
-                this.updateWebhookStatus('❌ Invalid JSON format', 'error');
-            }
-        }
-    }
+    // NOTE: manualSend() function removed - events are now sent automatically
+    // to the auto-configured RBM server endpoint
 
     // Update event status
     updateEventStatus(message, type) {
