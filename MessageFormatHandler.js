@@ -149,23 +149,14 @@ const _parseGoogleSuggestions = (suggestions) => {
         // Handle action suggestions
         if (suggestion.action) {
             const action = {
-                type: 'action',
-                text: suggestion.action.text || '',
-                postbackData: suggestion.action.postbackData || '',
-                displayText: suggestion.action.text || ''
+                label: suggestion.action.text || '',           // UI expects 'label'
+                action: suggestion.action.postbackData || '',  // UI expects 'action' 
+                type: 'secondary'                              // UI expects primary/secondary
             };
             
-            // Add specific action types
+            // Add URL if present (for future URL action support)
             if (suggestion.action.openUrlAction) {
-                action.actionType = 'openUrl';
                 action.url = suggestion.action.openUrlAction.url;
-            } else if (suggestion.action.dialAction) {
-                action.actionType = 'dial';
-                action.phoneNumber = suggestion.action.dialAction.phoneNumber;
-            } else if (suggestion.action.shareLocationAction) {
-                action.actionType = 'shareLocation';
-            } else {
-                action.actionType = 'generic';
             }
             
             return action;
@@ -173,11 +164,9 @@ const _parseGoogleSuggestions = (suggestions) => {
         
         // Fallback for legacy format
         return {
-            type: 'action',
-            text: suggestion.text || '',
-            postbackData: suggestion.postbackData || '',
-            displayText: suggestion.text || '',
-            actionType: 'generic'
+            label: suggestion.text || '',
+            action: suggestion.postbackData || '',
+            type: 'secondary'
         };
     });
 };
